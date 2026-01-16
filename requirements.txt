@@ -1,0 +1,7 @@
+Flask
+pandas
+yfinance
+matplotlib
+numpy
+gunicorn
+itsdangerous
