@@ -8,6 +8,9 @@ from itsdangerous import Signer
 import io
 import base64
 import numpy as np
+import os
+
+
 matplotlib.use('Agg')
 
 
@@ -20,6 +23,10 @@ def selamün_aleyküm():
     return render_template("hello.html")
 
 
+@app.route("/login" , methods = ['POST','GET'])
+def login():
+    return render_template("login.html")
+
 @app.route("/Finans")
 def finans():
     return render_template("finans_menu.html")
@@ -28,9 +35,6 @@ def finans():
 def Finance():
     try:
         sembol = request.form.get("hisse").upper().strip()
-        doviz_liste = ["USD", "EUR", "TRY", "GBP", "CHF", "JPY", "SAR"]
-        if any(birim in sembol for birim in doviz_liste) and "=X" not in sembol:
-            sembol += "=X"
         veri = yf.Ticker(sembol)
         gecmis = veri.history(period="1d")
         if not sembol:
@@ -435,5 +439,51 @@ def usd_hacim_analiz():
     except :
         return f"Bir Hata Oluştu "
 
+
+@app.route("/Coinler_Paneli")
+def coinler_en_popüler():
+    try:
+        semboller = [
+            "BTC-USD", "ETH-USD", "ETH-EUR","ETH-GBP","PAXG-USD","BNB-USD", "SOL-USD","STETH-USD", "XRP-USD", "ADA-USD",
+            "AVAX-USD", "DOGE-USD", "DOT-USD", "LINK-USD", "LTC-USD","WTRX-USD","WBETH-USD","XMR-USD",
+            "SHIB-USD", "TRX-USD", "ATOM-USD", "ETC-USD", "XLM-USD","HYPE32196-USD","ZEC-USD","HBAR-USD","CRO-USD",
+            "ALGO-USD",  "FIL-USD", "APE-USD", "SAND-USD", "MANA-USD","SUSDE-USD","RAIN38341-USD","MNT27075-USD",
+            "EGLD-USD", "AAVE-USD", "HBAR-USD","THETA-USD","FLOKI-USD","OKB-USD","JITOSOL-USD","ASTER36341-USD",
+            "LDO-USD" , "ICP-USD", "RUNE-USD" , "AGIX-USD" , "SEI-USD" ,"KAS-USD","MKR-USD","PEPE24478-USD",
+            "BTC-EUR","BTC-GBP",
+            "KCS-USD","RENDER-USD","TRUMP35336-USD" , "FBTC-USD" ,"QNT-USD","SLISBNBX-USD"
+        ]
+        df = yf.download(semboller,period="1d",interval="1m",progress=False,threads=True)
+        if df.empty:
+            return "Veri Alınamadı"
+
+        if 'Close' in df.columns:
+            fiyatlar = df['Close']
+        else:
+            fiyatlar = df
+
+
+        coin_listesi = []
+        for sembol in fiyatlar.columns:
+            seri = fiyatlar[sembol].dropna()
+            ilk_fiyat = seri.iloc[0]
+            son_fiyat = seri.iloc[-1]
+            değişim = ((son_fiyat - ilk_fiyat) / ilk_fiyat) * 100
+
+            if son_fiyat > 0.1:
+                basamak = 3
+            elif son_fiyat <0.1:
+                basamak = 10
+            elif son_fiyat <0.01:
+                basamak = 20
+            coin_listesi.append({'name' : sembol , 'price' : float(round(son_fiyat,basamak)) , 'degisim' : float(round(değişim,2))})
+        coin_listesi.sort(key=lambda x: x['price'],reverse=True)
+        return render_template("kripto_menu.html",veriler=coin_listesi)
+    except:
+        return f"Bir Hata Oluştu"
+
+
+
 if __name__ == "__main__":
-    app.run(debug=False,port=5006)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
