@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="60">
+    <title>Borsa İstanbul Canlı İzleme Paneli</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 20px; }
+        .container { max-width: 1300px; margin: auto; }
+        h1 { text-align: center; color: #38bdf8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+        .info-bar { text-align: center; margin-bottom: 20px; font-size: 0.9em; color: #94a3b8; }
+
+        /* YÜKLEME EKRANI STİLİ */
+        #loading {
+            display: block; /* Sayfa ilk açıldığında görünür başlar */
+            text-align: center; padding: 30px; background: #1e293b;
+            border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155;
+        }
+        .spinner {
+            border: 4px solid #334155; border-top: 4px solid #38bdf8;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite; margin: 0 auto 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Sektör Butonları Stili */
+        .filter-group { text-align: center; margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .btn-filter {
+            background-color: #1e293b; color: #94a3b8; border: 1px solid #334155;
+            padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.85em; transition: 0.3s;
+        }
+        .btn-filter:hover { border-color: #38bdf8; color: #38bdf8; }
+        .btn-filter.active { background-color: #38bdf8; color: #0f172a; font-weight: bold; border-color: #38bdf8; }
+
+        table { width: 100%; border-collapse: collapse; background-color: #1e293b; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+        th { background-color: #334155; color: #38bdf8; padding: 15px; text-align: left; font-size: 0.85em; text-transform: uppercase; border-bottom: 2px solid #1e293b; }
+        td { padding: 12px 15px; border-bottom: 1px solid #334155; font-size: 1.05em; font-weight: 500; }
+        tr:hover { background-color: #2d3748; transition: 0.2s; }
+
+        .company-name { color: #94a3b8; font-size: 0.85em; display: block; font-weight: normal; }
+        .ticker { color: #f1f5f9; font-weight: bold; font-size: 1.1em; }
+        .price { font-family: 'Courier New', Courier, monospace; font-weight: 600; }
+        .volume { color: #cbd5e1; font-size: 0.95em; }
+
+        .up { color: #22c55e; }
+        .down { color: #ef4444; }
+        .neutral { color: #94a3b8; }
+
+        .badge { padding: 6px 10px; border-radius: 6px; font-size: 0.9em; font-weight: bold; display: inline-block; min-width: 60px; text-align: center; }
+        .badge-up { background-color: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-down { background-color: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Borsa İstanbul Terminali</h1>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <h3 style="color: #38bdf8; margin: 0;">Veriler Analiz Ediliyor...</h3>
+        <p style="color: #94a3b8; font-size: 0.8em;">Yahoo Finance üzerinden 200+ hisse işleniyor.</p>
+    </div>
+
+    <div class="info-bar">
+        Son Güncelleme: <span id="clock"></span> | <span id="active-filter">Tüm Hisseler</span> | Otomatik Yenileme: 60s
+    </div>
+
+    <div class="filter-group">
+        <button class="btn-filter active" onclick="filterSector('Hepsi', this)">TÜMÜ</button>
+        <button class="btn-filter" onclick="filterSector('Banka', this)">BANKA</button>
+        <button class="btn-filter" onclick="filterSector('Enerji', this)">ENERJİ</button>
+        <button class="btn-filter" onclick="filterSector('Ulaşım', this)">ULAŞIM</button>
+        <button class="btn-filter" onclick="filterSector('Sınai', this)">SANAYİ</button>
+        <button class="btn-filter" onclick="filterSector('Taş Toprak', this)">TAŞ TOPRAK</button>
+        <button class="btn-filter" onclick="filterSector('Holding', this)">HOLDİNG</button>
+        <button class="btn-filter" onclick="filterSector('Yatırım', this)">YATIRIM</button>
+        <button class="btn-filter" onclick="filterSector('Gıda', this)">GIDA</button>
+    </div>
+
+    <table id="main-table">
+        <thead>
+            <tr>
+                <th>Hisse & Şirket</th>
+                <th>Açılış</th>
+                <th>Son Fiyat</th>
+                <th>Hacim (Lot)</th>
+                <th>Günlük Değişim</th>
+            </tr>
+        </thead>
+        <tbody id="stock-table">
+            {% for hisse in veriler %}
+            <tr class="hisse-row" data-sektor="{{ hisse.sektor }}">
+                <td>
+                    <span class="ticker">{{ hisse.kod }}</span>
+                    <span class="company-name">{{ hisse.name }}</span>
+                    <small style="color: #64748b; font-size: 0.7em; text-transform: uppercase;">{{ hisse.sektor }}</small>
+                </td>
+                <td class="price">{{ "{:,.2f}".format(hisse.acılıs) }} ₺</td>
+                <td class="price" style="color: #38bdf8;">{{ "{:,.2f}".format(hisse.fiyat) }} ₺</td>
+                <td class="volume">
+                    {% if hisse.Hacim >= 1000000 %}
+                        <strong>{{ (hisse.Hacim / 1000000) | round(1) }}M</strong>
+                    {% elif hisse.Hacim >= 1000 %}
+                        <strong>{{ (hisse.Hacim / 1000) | round(0) }}B</strong>
+                    {% else %}
+                        {{ hisse.Hacim }}
+                    {% endif %}
+                </td>
+                <td class="{% if hisse.degisim > 0 %}up{% elif hisse.degisim < 0 %}down{% else %}neutral{% endif %}">
+                    <span class="badge {% if hisse.degisim > 0 %}badge-up{% elif hisse.degisim < 0 %}badge-down{% endif %}">
+                        {% if hisse.degisim > 0 %}+{% endif %}{{ hisse.degisim }}%
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // SAYFA YÜKLENDİĞİNDE ÇALIŞACAK
+    window.onload = function() {
+        // Veriler geldiğinde yükleme ekranını gizle, tabloyu göster
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('main-table').style.opacity = '1';
+    };
+
+    // Sayfa yenilenirken (refresh meta etiketi çalıştığında) yükleme ekranını tekrar açar
+    window.onbeforeunload = function() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('main-table').style.opacity = '0.2';
+    };
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('tr-TR');
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function filterSector(sektor, element) {
+        document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+        element.classList.add('active');
+        document.getElementById('active-filter').innerText = sektor === 'Hepsi' ? 'Tüm Hisseler' : sektor + ' Sektörü';
+
+        const rows = document.querySelectorAll('.hisse-row');
+        rows.forEach(row => {
+            const rowSektor = row.getAttribute('data-sektor');
+            if (sektor === 'Hepsi' || rowSektor === sektor) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
