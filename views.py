@@ -71,8 +71,16 @@ def Finance():
                                    en_yuksek=en_yuksek,
                                    en_dusuk=en_dusuk,
                                    hacim=hacim, ortalama_hacim=ortalama_hacim)
-    except:
-        return f"Bir Hata Oluştu"
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
 
 @app.route("/Hacim_Ekranı")
 def hacim_ekranı():
@@ -158,8 +166,16 @@ def hacim_bilgisi():
                        z_skor=z_skor,
                        renk=renk,ilk_tarih=df.index[0].strftime("%Y-%m-%d"),
                        son_tarih=df.index[-1].strftime("%Y-%m-%d"),hacim_grafik_url=hacim_grafik_url,hacim_fark_yüzde=round(hacim_fark_yüzde),ilk_hacim=ilk_hacim)
-    except:
-        return f"Bir Hata Oluştu"
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
 
 @app.route("/Grafikler")
 def grafikler():
@@ -213,8 +229,16 @@ def grafik_penceresi():
                                fiyat_renk=fiyat_renk,
                                grafik=grafik_url)
 
-    except:
-        return f"Bir Hata Oluştu "
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
 
 @app.route("/Coklu_Grafik_Giris")
 def çoklu_grafikler():
@@ -286,10 +310,18 @@ def çoklu_grafikler_penceresi():
                                df1_son_fiyat=df1_son_fiyat,
                                df2_baslangic_fiyat=df2_baslangic_fiyat,
                                df2_son_fiyat=df2_son_fiyat)
-    except:
-        return f"Bir Hata Oluştu"
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
 
-@app.route("/Dolar_Bazlı_Grafik",methods=['POST'])
+@app.route("/Dolar_Bazlı_Grafik",methods=['POST','GET'])
 def dolar_bazlı_grafik():
     return render_template("dolar_grafik.html")
 
@@ -335,6 +367,8 @@ def dolar_bazlı_grafik_ekranı():
             dolar_bazlı_seri = sembol_df.loc[ortak, "Close"] / usd_df.loc[ortak, "Close"]
 
         dolar_bazlı_seri = dolar_bazlı_seri.dropna()
+        en_yüksek = dolar_bazlı_seri.max()
+        en_düşük = dolar_bazlı_seri.min()
 
 
         ilk_fiyat = float(dolar_bazlı_seri.iloc[0])
@@ -354,6 +388,8 @@ def dolar_bazlı_grafik_ekranı():
         ax.plot(dolar_bazlı_seri.index, dolar_bazlı_seri.values, alpha=0.5, color=renk, linewidth=2)
         ax.fill_between(dolar_bazlı_seri.index, dolar_bazlı_seri.values, color=renk, alpha=0.3, interpolate=True)
         ax.set_title(f"{sembol} | Değişim : {değişim} (%){toplam_degisim_yuzde} {ilk_uc} Bazlı Grafik")
+        ax.axhline(y=en_yüksek,color="green",alpha=0.4,linewidth=0.8,linestyle="--")
+        ax.axhline(y=en_düşük,color="green",alpha=0.4,linewidth=0.8,linestyle="--")
         plt.xlabel("Tarih")
         plt.ylabel("Fiyat")
         plt.grid(True, alpha=0.1)
@@ -368,8 +404,18 @@ def dolar_bazlı_grafik_ekranı():
                                son_fiyat=round(son_fiyat, 2),
                                toplam_degisim_yuzde=round(toplam_degisim_yuzde, 2),
                                değişim=round(değişim, 2), period=period, interval=interval)
-    except:
-        return f"Bir Hata Oluştu "
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
+
+
 
 @app.route("/USD_HACİM")
 def usd_hacim():
@@ -436,8 +482,16 @@ def usd_hacim_analiz():
                                usd_hacim_fark_yuzde=usd_hacim_fark_yuzde, en_yüksek_hacim=en_yüksek_hacim,
                                en_düşük_hacim=en_düşük_hacim, en_düşük_tarih=en_düşük_tarih,
                                en_yüksek_tarih=en_yüksek_tarih)
-    except :
-        return f"Bir Hata Oluştu "
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
 
 
 @app.route("/Coinler_Paneli")
@@ -453,7 +507,7 @@ def coinler_en_popüler():
             "BTC-EUR","BTC-GBP",
             "KCS-USD","RENDER-USD","TRUMP35336-USD" , "FBTC-USD" ,"QNT-USD","SLISBNBX-USD"
         ]
-        df = yf.download(semboller,period="1d",interval="1m",progress=False,threads=True)
+        df = yf.download(semboller,period="1d",interval="1m",progress=False,threads=True,timeout=12)
         if df.empty:
             return "Veri Alınamadı"
 
@@ -463,12 +517,16 @@ def coinler_en_popüler():
             fiyatlar = df
 
 
+
         coin_listesi = []
         for sembol in fiyatlar.columns:
             seri = fiyatlar[sembol].dropna()
             ilk_fiyat = seri.iloc[0]
             son_fiyat = seri.iloc[-1]
             değişim = ((son_fiyat - ilk_fiyat) / ilk_fiyat) * 100
+            data = yf.Ticker(sembol)
+            market_değeri = data.info.get('MarketCap',0)
+
 
             if son_fiyat > 0.1:
                 basamak = 3
@@ -479,8 +537,472 @@ def coinler_en_popüler():
             coin_listesi.append({'name' : sembol , 'price' : float(round(son_fiyat,basamak)) , 'degisim' : float(round(değişim,2))})
         coin_listesi.sort(key=lambda x: x['price'],reverse=True)
         return render_template("kripto_menu.html",veriler=coin_listesi)
-    except:
-        return f"Bir Hata Oluştu"
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
+
+@app.route("/Borsa_Paneli")
+def borsa_paneli():
+    try:
+
+        hisse_rehberi = {
+            "XU100": {"ad": "BIST 100", "sektor": "Endeks"},
+            "XU500": {"ad": "BIST 500", "sektor": "Endeks"},
+            "XBANK": {"ad": "BIST Banka", "sektor": "Endeks"},
+            "XTEKS": {"ad": "BIST Tekstil", "sektor": "Endeks"},
+            "XELKT": {"ad": "BIST Elektrik", "sektor": "Endeks"},
+            "XTCRT": {"ad": "BIST Ticaret", "sektor": "Endeks"},
+            "XINSA": {"ad": "BIST İnşaat", "sektor": "Endeks"},
+            "XTAST": {"ad": "BIST Taş Toprak", "sektor": "Endeks"},
+            "XILTM": {"ad": "BIST İletişim", "sektor": "Endeks"},
+            "XKAGT": {"ad": "BIST Kağıt", "sektor": "Endeks"},
+            "XMANA": {"ad": "BIST Metal Ana", "sektor": "Endeks"},
+            "XSPOR": {"ad": "BIST Spor", "sektor": "Endeks"},
+            "XTMTU": {"ad": "BIST Temettü", "sektor": "Endeks"},
+            "XUSIN": {"ad": "BIST Sınai", "sektor": "Endeks"},
+            "XUTEK": {"ad": "BIST Teknoloji", "sektor": "Endeks"},
+            "XHOLD": {"ad": "BIST Holding", "sektor": "Endeks"},
+            "XGIDA": {"ad": "BIST Gıda", "sektor": "Endeks"},
+
+            "AFYON": {"ad": "Afyon Çimento", "sektor": "Taş Toprak"},
+            "AKCNS": {"ad": "Akçansa Çimento", "sektor": "Taş Toprak"},
+            "BSOKE": {"ad": "Batısöke Çimento", "sektor": "Taş Toprak"},
+            "BTCIM": {"ad": "Batıçim Çimento", "sektor": "Taş Toprak"},
+            "BUCIM": {"ad": "Bursa Çimento", "sektor": "Taş Toprak"},
+            "CIMSA": {"ad": "Çimsa Çimento", "sektor": "Taş Toprak"},
+            "CMBTN": {"ad": "Çimbeton", "sektor": "Taş Toprak"},
+            "DOGUB": {"ad": "Doğusan Boru", "sektor": "Taş Toprak"},
+            "EGSER": {"ad": "Ege Seramik", "sektor": "Taş Toprak"},
+            "GOLTS": {"ad": "Göltaş Çimento", "sektor": "Taş Toprak"},
+            "KONYA": {"ad": "Konya Çimento", "sektor": "Taş Toprak"},
+            "KUTPO": {"ad": "Kütahya Porselen", "sektor": "Taş Toprak"},
+            "OYAKC": {"ad": "Oyak Çimento", "sektor": "Taş Toprak"},
+            "NUHCM": {"ad": "Nuh Çimento", "sektor": "Taş Toprak"},
+            "USAK": {"ad": "Uşak Seramik", "sektor": "Taş Toprak"},
+            "NIBAS": {"ad": "Niğbaş Beton", "sektor": "Taş Toprak"},
+            "KLKIM": {"ad": "Kalekim", "sektor": "Taş Toprak"},
+            "BOBET": {"ad": "Boğaziçi Beton", "sektor": "Taş Toprak"},
+            "BIENY": {"ad": "Bien Yapı Ürünleri", "sektor": "Taş Toprak"},
+            "KLSER": {"ad": "Kaleseramik", "sektor": "Taş Toprak"},
+            "TUREX": {"ad": "Tureks Madencilik", "sektor": "Taş Toprak"},
+            "LMKDC": {"ad": "Limak Doğu Anadolu", "sektor": "Taş Toprak"},
+            "CMENT": {"ad": "Çimentaş", "sektor": "Taş Toprak"},
+            "SRVGY": {"ad": "Seranit (Servet GYO bünyesinde)", "sektor": "Taş Toprak"},
+            "AKBNK": {"ad": "Akbank", "sektor": "Banka"},
+            "GARAN": {"ad": "Garanti BBVA", "sektor": "Banka"},
+            "ISCTR": {"ad": "İş Bankası (C)", "sektor": "Banka"},
+            "HALKB": {"ad": "Halkbank", "sektor": "Banka"},
+            "VAKBN": {"ad": "Vakıfbank", "sektor": "Banka"},
+            "YKBNK": {"ad": "Yapı Kredi", "sektor": "Banka"},
+            "TSKB": {"ad": "T.S.K.B.", "sektor": "Banka"},
+            "SKBNK": {"ad": "Şekerbank", "sektor": "Banka"},
+            "ALBRK": {"ad": "Albaraka Türk", "sektor": "Banka"},
+
+            "AKENR": {"ad": "Akenerji", "sektor": "Enerji"},
+            "AKSEN": {"ad": "Aksa Enerji", "sektor": "Enerji"},
+            "AKSUE": {"ad": "Aksu Enerji", "sektor": "Enerji"},
+            "AYEN": {"ad": "Ayen Enerji", "sektor": "Enerji"},
+            "ZEDUR": {"ad": "Zedur Enerji", "sektor": "Enerji"},
+            "ZOREN": {"ad": "Zorlu Enerji", "sektor": "Enerji"},
+            "LYDYE": {"ad": "Lydia Yeşil Enerji", "sektor": "Enerji"},
+            "ODAS": {"ad": "ODAŞ Elektrik", "sektor": "Enerji"},
+            "PAMEL": {"ad": "Pamukova Yenilenebilir Enerji", "sektor": "Enerji"},
+            "ENJSA": {"ad": "Enerjisa Enerji", "sektor": "Enerji"},
+            "NATEN": {"ad": "Naturel Yenilenebilir Enerji", "sektor": "Enerji"},
+            "ESEN": {"ad": "Esenboğa Elektrik", "sektor": "Enerji"},
+            "NTGAZ": {"ad": "Naturelgaz", "sektor": "Enerji"},
+            "GWIND": {"ad": "Galata Wind Enerji", "sektor": "Enerji"},
+            "BIOEN": {"ad": "Biotrend Yatırım", "sektor": "Enerji"},
+            "AYDEM": {"ad": "Aydem Enerji", "sektor": "Enerji"},
+            "CANTE": {"ad": "Can2 Termik", "sektor": "Enerji"},
+            "MAGEN": {"ad": "Margün Enerji", "sektor": "Enerji"},
+            "ARASE": {"ad": "Doğu Aras Enerji", "sektor": "Enerji"},
+            "HUNER": {"ad": "Hun Yenilenebilir Enerji", "sektor": "Enerji"},
+            "SMRTG": {"ad": "Smart Güneş Enerjisi", "sektor": "Enerji"},
+            "CONSE": {"ad": "Consus Enerji", "sektor": "Enerji"},
+            "ALFAS": {"ad": "Alfa Solar Enerji", "sektor": "Enerji"},
+            "AHGAZ": {"ad": "Ahlatcı Doğal Gaz", "sektor": "Enerji"},
+            "AKFYE": {"ad": "Akfen Yenilenebilir Enerji", "sektor": "Enerji"},
+            "CWENE": {"ad": "Cw Enerji", "sektor": "Enerji"},
+            "IZENR": {"ad": "İzdemir Enerji", "sektor": "Enerji"},
+            "TATEN": {"ad": "Tatlıpınar Enerji", "sektor": "Enerji"},
+            "ENERY": {"ad": "Enerya Enerji", "sektor": "Enerji"},
+            "CATES": {"ad": "Çates Elektrik", "sektor": "Enerji"},
+            "MOGAN": {"ad": "Mogan Enerji", "sektor": "Enerji"},
+            "ENTRA": {"ad": "Ic Enterra", "sektor": "Enerji"},
+            "BIGEN": {"ad": "Birleşim Grup Enerji", "sektor": "Enerji"},
+            "ENDAE": {"ad": "Enda Enerji Holding", "sektor": "Enerji"},
+            "KLYPV": {"ad": "Kalyon Güneş Teknolojileri", "sektor": "Enerji"},
+            "A1YEN": {"ad": "A1 Yenilenebilir Enerji", "sektor": "Enerji"},
+            "ECOGR": {"ad": "Ecogreen Enerji", "sektor": "Enerji"},
+            "ARFYE": {"ad": "Arf Bio Yenilenebilir", "sektor": "Enerji"},
+            "ASTOR" : {'ad' : "Astor Enerji A.Ş.","sektor":"Enerji"},
+
+            "THYAO": {"ad": "Türk Hava Yolları", "sektor": "Ulaşım"},
+            "PGSUS": {"ad": "Pegasus", "sektor": "Ulaşım"},
+            "TAVHL": {"ad": "TAV Havalimanları", "sektor": "Ulaşım"},
+            "DOAS": {"ad": "Doğuş Otomotiv", "sektor": "Ulaşım"},
+            "FROTO": {"ad": "Ford Otosan", "sektor": "Ulaşım"},
+            "TOASO": {"ad": "Tofaş Oto", "sektor": "Ulaşım"},
+            "CLEBI": {"ad": "Çelebi Hava Servisi", "sektor": "Ulaşım"},
+            "GSDDE": {"ad": "GSD Marin", "sektor": "Ulaşım"},
+            "RYSAS": {"ad": "Reysaş Taşımacılık", "sektor": "Ulaşım"},
+            "BEYAZ": {"ad": "Beyaz Filo Oto Kiralama", "sektor": "Ulaşım"},
+            "PGSUS": {"ad": "Pegasus Hava Taşımacılığı", "sektor": "Ulaşım"},
+            "TLMAN": {"ad": "Trabzon Liman İşletmeciliği", "sektor": "Ulaşım"},
+            "TUREX": {"ad": "Tureks Turizm", "sektor": "Ulaşım"},
+            "GRSEL": {"ad": "Gür-Sel Turizm Taşımacılık", "sektor": "Ulaşım"},
+            "PASEU": {"ad": "Pasifik Eurasia Lojistik", "sektor": "Ulaşım"},
+            "HRKET": {"ad": "Hareket Proje Taşımacılığı", "sektor": "Ulaşım"},
+            "HOROZ": {"ad": "Horoz Lojistik", "sektor": "Ulaşım"},
+            #SINAI VE ÜRETİM
+            "ADEL": {"ad": "Adel Kalemcilik", "sektor": "Sınai"},
+            "AEFES": {"ad": "Anadolu Efes", "sektor": "Sınai"},
+            "AKSA": {"ad": "Aksa Akrilik", "sektor": "Sınai"},
+            "ALCAR": {"ad": "Alarko Carrier", "sektor": "Sınai"},
+            "ALKA": {"ad": "Alkim Kağıt", "sektor": "Sınai"},
+            "ALKIM": {"ad": "Alkim Kimya", "sektor": "Sınai"},
+            "ARCLK": {"ad": "Arçelik A.Ş.", "sektor": "Sınai"},
+            "ARSAN": {"ad": "Arsan Tekstil", "sektor": "Sınai"},
+            "ASUZU": {"ad": "Anadolu Isuzu", "sektor": "Sınai"},
+            "AVOD": {"ad": "AVOD Gıda", "sektor": "Sınai"},
+            "AYGAZ": {"ad": "Aygaz A.Ş.", "sektor": "Sınai"},
+            "BAGFS": {"ad": "Bağfaş Gübre", "sektor": "Sınai"},
+            "BAKAB": {"ad": "Bak Ambalaj", "sektor": "Sınai"},
+            "BANVT": {"ad": "Banvit", "sektor": "Sınai"},
+            "BLCYT": {"ad": "Bilici Yatırım", "sektor": "Sınai"},
+            "BOSSA": {"ad": "Bossa Tekstil", "sektor": "Sınai"},
+            "BRKSN": {"ad": "Berkosan", "sektor": "Sınai"},
+            "BRISA": {"ad": "Borusan Birleşik", "sektor": "Sınai"},
+            "BURCE": {"ad": "Burçelik Çelik", "sektor": "Sınai"},
+            "BURVA": {"ad": "Burçelik Vana", "sektor": "Sınai"},
+            "CELHA": {"ad": "Çelik Halat", "sektor": "Sınai"},
+            "CEMAS": {"ad": "Çemaş Döküm", "sektor": "Sınai"},
+            "CEMTS": {"ad": "Çemtaş Çelik", "sektor": "Sınai"},
+            "DOKTA": {"ad": "Döktaş Dökümcülük", "sektor": "Sınai"},
+            "DAGI": {"ad": "Dagi Giyim", "sektor": "Sınai"},
+            "DARDL": {"ad": "Dardanel Önentaş", "sektor": "Sınai"},
+            "DERIM": {"ad": "Derimod", "sektor": "Sınai"},
+            "DESA": {"ad": "Desa Deri", "sektor": "Sınai"},
+            "DEVA": {"ad": "Deva Holding", "sektor": "Sınai"},
+            "DITAS": {"ad": "Ditaş Doğan", "sektor": "Sınai"},
+            "DMSAS": {"ad": "Demisaş Döküm", "sektor": "Sınai"},
+            "DURDO": {"ad": "Duran Doğan Basım", "sektor": "Sınai"},
+            "DYOBY": {"ad": "DYO Boya", "sektor": "Sınai"},
+            "EGEEN": {"ad": "Ege Endüstri", "sektor": "Sınai"},
+            "EGGUB": {"ad": "Ege Gübre", "sektor": "Sınai"},
+            "EGPRO": {"ad": "Ege Profil", "sektor": "Sınai"},
+            "EMKEL": {"ad": "EMEK Elektrik", "sektor": "Sınai"},
+            "EPLAS": {"ad": "Egeplast", "sektor": "Sınai"},
+            "ERBOS": {"ad": "Erbosan Boru", "sektor": "Sınai"},
+            "EREGL": {"ad": "Erdemir", "sektor": "Sınai"},
+            "ERSU": {"ad": "ERSU Meyve", "sektor": "Sınai"},
+            "FMIZP": {"ad": "Federal Mogul", "sektor": "Sınai"},
+            "FRIGO": {"ad": "Frigo Pak Gıda", "sektor": "Sınai"},
+            "FROTO": {"ad": "Ford Otomotiv", "sektor": "Sınai"},
+            "GENTS": {"ad": "Gentaş", "sektor": "Sınai"},
+            "GEREL": {"ad": "Gersan Elektrik", "sektor": "Sınai"},
+            "GOODY": {"ad": "Goodyear", "sektor": "Sınai"},
+            "GUBRF": {"ad": "Gübretaş", "sektor": "Sınai"},
+            "HATEK": {"ad": "Hateks Tekstil", "sektor": "Sınai"},
+            "HEKTS": {"ad": "Hektaş Ticaret", "sektor": "Sınai"},
+            "IHEVA": {"ad": "İhlas Ev Aletleri", "sektor": "Sınai"},
+            "IZMDC": {"ad": "İzmir Demir Çelik", "sektor": "Sınai"},
+            "KAPLM": {"ad": "Kaplamin Ambalaj", "sektor": "Sınai"},
+            "KARSN": {"ad": "Karsan Otomotiv", "sektor": "Sınai"},
+            "KARTN": {"ad": "Kartonsan", "sektor": "Sınai"},
+            "KATMR": {"ad": "Katmerciler", "sektor": "Sınai"},
+            "KRSTL": {"ad": "Kristal Kola", "sektor": "Sınai"},
+            "KRDMA": {"ad": "Kardemir A", "sektor": "Sınai"},
+            "KORDS": {"ad": "Kordsa Teknik", "sektor": "Sınai"},
+            "KLMSN": {"ad": "Klimasan Klima", "sektor": "Sınai"},
+            "KNFRT": {"ad": "Konfrut Gıda", "sektor": "Sınai"},
+            "KRTEK": {"ad": "Karsu Tekstil", "sektor": "Sınai"},
+            "LUKSK": {"ad": "Lüks Kadife", "sektor": "Sınai"},
+            "MRSHL": {"ad": "Marshall Boya", "sektor": "Sınai"},
+            "MNDRS": {"ad": "Menderes Tekstil", "sektor": "Sınai"},
+            "OTKAR": {"ad": "Otokar", "sektor": "Sınai"},
+            "PARSN": {"ad": "Parsan Makina", "sektor": "Sınai"},
+            "PENGD": {"ad": "Penguen Gıda", "sektor": "Sınai"},
+            "PETKM": {"ad": "Petkim", "sektor": "Sınai"},
+            "PETUN": {"ad": "Pınar Et ve Un", "sektor": "Sınai"},
+            "PINSU": {"ad": "Pınar Su", "sektor": "Sınai"},
+            "PNSUT": {"ad": "Pınar Süt", "sektor": "Sınai"},
+            "PRKME": {"ad": "Park Elektrik", "sektor": "Sınai"},
+            "PRKAB": {"ad": "Türk Prysmian", "sektor": "Sınai"},
+            "SAMAT": {"ad": "Saray Matbaacılık", "sektor": "Sınai"},
+            "SARKY": {"ad": "Sarkuysan Elektrolit", "sektor": "Sınai"},
+            "SASA": {"ad": "SASA Polyester", "sektor": "Sınai"},
+            "SILVR": {"ad": "Silverline Endüstri", "sektor": "Sınai"},
+            "SKTAS": {"ad": "Söktaş Tekstil", "sektor": "Sınai"},
+            "TBORG": {"ad": "Türk Tuborg", "sektor": "Sınai"},
+            "TOASO": {"ad": "Tofaş", "sektor": "Sınai"},
+            "TRCAS": {"ad": "Turcas Petrol", "sektor": "Sınai"},
+            "TTRAK": {"ad": "Türk Traktör", "sektor": "Sınai"},
+            "TUKAS": {"ad": "Tukaş Gıda", "sektor": "Sınai"},
+            "TUPRS": {"ad": "Tüpraş", "sektor": "Sınai"},
+            "ULKER": {"ad": "Ülker Bisküvi", "sektor": "Sınai"},
+            "ACSEL": {"ad": "Acıselsan Acıpayam", "sektor": "Sınai"},
+            "ADESE": {"ad": "Adese Gayrimenkul", "sektor": "Sınai"},
+            "AFYON": {"ad": "Afyon Çimento", "sektor": "Taş Toprak"},
+            "AKCNS": {"ad": "Akçansa Çimento", "sektor": "Taş Toprak"},
+            "AKSA": {"ad": "Aksa Akrilik", "sektor": "Sınai"},
+            "ALCAR": {"ad": "Alarko Carrier", "sektor": "Sınai"},
+            "ALKA": {"ad": "Alkim Kağıt", "sektor": "Sınai"},
+            "ALKIM": {"ad": "Alkim Kimya", "sektor": "Sınai"},
+            "ARCLK": {"ad": "Arçelik", "sektor": "Sınai"},
+            "ARSAN": {"ad": "Arsan Tekstil", "sektor": "Sınai"},
+            "ASUZU": {"ad": "Anadolu Isuzu", "sektor": "Sınai"},
+            "AVOD": {"ad": "Avod Gıda", "sektor": "Sınai"},
+            "AYGAZ": {"ad": "Aygaz", "sektor": "Sınai"},
+            "BAGFS": {"ad": "Bağfaş", "sektor": "Sınai"},
+            "BAKAB": {"ad": "Bak Ambalaj", "sektor": "Sınai"},
+            "BANVT": {"ad": "Banvit", "sektor": "Sınai"},
+            "BNTAS": {"ad": "Bantaş", "sektor": "Sınai"},
+            "BARMA": {"ad": "Barem Ambalaj", "sektor": "Sınai"},
+            "BERA": {"ad": "Bera Holding", "sektor": "Holding"},
+            "BRISA": {"ad": "Brisa", "sektor": "Sınai"},
+            "BSOKE": {"ad": "Batısöke Çimento", "sektor": "Taş Toprak"},
+            "BTCIM": {"ad": "Batıçim Çimento", "sektor": "Taş Toprak"},
+            "BUCIM": {"ad": "Bursa Çimento", "sektor": "Taş Toprak"},
+            "BURCE": {"ad": "Burçelik", "sektor": "Sınai"},
+            "BURVA": {"ad": "Burçelik Vana", "sektor": "Sınai"},
+            "CANTE": {"ad": "Çan2 Termik", "sektor": "Sınai"},
+            "CELHA": {"ad": "Çelik Halat", "sektor": "Sınai"},
+            "CEMAS": {"ad": "Çemaş Döküm", "sektor": "Sınai"},
+            "CEMTS": {"ad": "Çemtaş", "sektor": "Sınai"},
+            "CIMSA": {"ad": "Çimsa", "sektor": "Taş Toprak"},
+            "CMBTN": {"ad": "Çimbeton", "sektor": "Taş Toprak"},
+            "CMENT": {"ad": "Çimentaş", "sektor": "Taş Toprak"},
+            "CONSE": {"ad": "Consus Enerji", "sektor": "Sınai"},
+            "CUSAN": {"ad": "Çuhadaroğlu Metal", "sektor": "Sınai"},
+            "DAGI": {"ad": "Dagi Giyim", "sektor": "Sınai"},
+            "DARDL": {"ad": "Dardanel", "sektor": "Sınai"},
+            "DERIM": {"ad": "Derimod", "sektor": "Sınai"},
+            "DESA": {"ad": "Desa Deri", "sektor": "Sınai"},
+            "DEVA": {"ad": "Deva Holding", "sektor": "Sınai"},
+            "DITAS": {"ad": "Ditaş Doğan", "sektor": "Sınai"},
+            "DMSAS": {"ad": "Demisaş Döküm", "sektor": "Sınai"},
+            "DOKTA": {"ad": "Döktaş Döküm", "sektor": "Sınai"},
+            "DURDO": {"ad": "Duran Doğan Basım", "sektor": "Sınai"},
+            "DYOBY": {"ad": "Dyo Boya", "sektor": "Sınai"},
+            "EGEEN": {"ad": "Ege Endüstri", "sektor": "Sınai"},
+            "EGGUB": {"ad": "Ege Gübre", "sektor": "Sınai"},
+            "EGPRO": {"ad": "Ege Profil", "sektor": "Sınai"},
+            "EGSER": {"ad": "Ege Seramik", "sektor": "Taş Toprak"},
+            "EMKEL": {"ad": "Emek Elektrik", "sektor": "Sınai"},
+            "EPLAS": {"ad": "Egeplast", "sektor": "Sınai"},
+            "ERBOS": {"ad": "Erbosan", "sektor": "Sınai"},
+            "EREGL": {"ad": "Erdemir", "sektor": "Sınai"},
+            "ERSU": {"ad": "Ersu Gıda", "sektor": "Sınai"},
+            "ESCOM": {"ad": "Escort Teknoloji", "sektor": "Sınai"},
+            "FMIZP": {"ad": "Federal Mogul İzmit", "sektor": "Sınai"},
+            "FRIGO": {"ad": "Frigo Pak Gıda", "sektor": "Sınai"},
+            "FROTO": {"ad": "Ford Otosan", "sektor": "Sınai"},
+            "GEDZA": {"ad": "Gediz Ambalaj", "sektor": "Sınai"},
+            "GENTS": {"ad": "Gentaş", "sektor": "Sınai"},
+            "GEREL": {"ad": "Gersan Elektrik", "sektor": "Sınai"},
+            "GOLTS": {"ad": "Göltaş Çimento", "sektor": "Taş Toprak"},
+            "GOODY": {"ad": "Goodyear", "sektor": "Sınai"},
+            "GUBRF": {"ad": "Gübretaş", "sektor": "Sınai"},
+            "HATEK": {"ad": "Hateks", "sektor": "Sınai"},
+            "HEKTS": {"ad": "Hektaş", "sektor": "Sınai"},
+            "IHEVA": {"ad": "İhlas Ev Aletleri", "sektor": "Sınai"},
+            "ISKPL": {"ad": "Işık Plastik", "sektor": "Sınai"},
+            "ISDMR": {"ad": "İskenderun Demir Çelik", "sektor": "Sınai"},
+            "IZMDC": {"ad": "İzmir Demir Çelik", "sektor": "Sınai"},
+            "JANTS": {"ad": "Jantsa", "sektor": "Sınai"},
+            "KAPLM": {"ad": "Kaplamin", "sektor": "Sınai"},
+            "KAREL": {"ad": "Karel Elektronik", "sektor": "Sınai"},
+            "KARSN": {"ad": "Karsan", "sektor": "Sınai"},
+            "KARTN": {"ad": "Kartonsan", "sektor": "Sınai"},
+            "KATMR": {"ad": "Katmerciler", "sektor": "Sınai"},
+            "KFEIN": {"ad": "Kafein Yazılım", "sektor": "Sınai"},
+            "KIMMR": {"ad": "Kiler Tekstil", "sektor": "Sınai"},
+            "KLMSN": {"ad": "Klimasan", "sektor": "Sınai"},
+            "KNFRT": {"ad": "Konfrut Gıda", "sektor": "Sınai"},
+            "KONYA": {"ad": "Konya Çimento", "sektor": "Taş Toprak"},
+            "KORDS": {"ad": "Kordsa", "sektor": "Sınai"},
+            "KRTEK": {"ad": "Karsu Tekstil", "sektor": "Sınai"},
+            "KRSTL": {"ad": "Kristal Kola", "sektor": "Sınai"},
+            "KUTPO": {"ad": "Kütahya Porselen", "sektor": "Taş Toprak"},
+            "LUKSK": {"ad": "Lüks Kadife", "sektor": "Sınai"},
+            "MAKTK": {"ad": "Makina Takım", "sektor": "Sınai"},
+            "BLUME": {"ad": "Metemtur", "sektor": "Sınai"},
+            "MNDRS": {"ad": "Menderes Tekstil", "sektor": "Sınai"},
+            "MRSHL": {"ad": "Marshall", "sektor": "Sınai"},
+            "MSGYO": {"ad": "Mistral GYO", "sektor": "Sınai"},
+            "NIBAS": {"ad": "Niğbaş Beton", "sektor": "Taş Toprak"},
+            "NUHCM": {"ad": "Nuh Çimento", "sektor": "Taş Toprak"},
+            "OTKAR": {"ad": "Otokar", "sektor": "Sınai"},
+            "OYAKC": {"ad": "Oyak Çimento", "sektor": "Taş Toprak"},
+            "OZKGY": {"ad": "Özak GYO", "sektor": "Sınai"},
+            "PARSN": {"ad": "Parsan", "sektor": "Sınai"},
+            "PENGD": {"ad": "Penguen Gıda", "sektor": "Sınai"},
+            "PETKM": {"ad": "Petkim", "sektor": "Sınai"},
+            "PETUN": {"ad": "Pınar Et Un", "sektor": "Sınai"},
+            "PINSU": {"ad": "Pınar Su", "sektor": "Sınai"},
+            "PNSUT": {"ad": "Pınar Süt", "sektor": "Sınai"},
+            "POLTK": {"ad": "Politeknik Metal", "sektor": "Sınai"},
+            "PRKAB": {"ad": "Prysmian Kablo", "sektor": "Sınai"},
+            "PRKME": {"ad": "Park Elektrik", "sektor": "Sınai"},
+            "PRZMA": {"ad": "Prizma Press", "sektor": "Sınai"},
+            "SAMAT": {"ad": "Saray Matbaa", "sektor": "Sınai"},
+            "SANEL": {"ad": "Sanel Mühendislik", "sektor": "Sınai"},
+            "SANFM": {"ad": "Sanifoam", "sektor": "Sınai"},
+            "SARKY": {"ad": "Sarkuysan", "sektor": "Sınai"},
+            "SASA": {"ad": "Sasa", "sektor": "Sınai"},
+            "SAYAS": {"ad": "Say Yenilenebilir", "sektor": "Sınai"},
+            "SEKUR": {"ad": "Sekuro Plastik", "sektor": "Sınai"},
+            "DUNYH": {"ad": "Selçuk Gıda", "sektor": "Sınai"},
+            "SILVR": {"ad": "Silverline", "sektor": "Sınai"},
+            "SKTAS": {"ad": "Söktaş", "sektor": "Sınai"},
+            "SUNTK": {"ad": "Sun Tekstil", "sektor": "Sınai"},
+            "TATGD": {"ad": "Tat Gıda", "sektor": "Sınai"},
+            "TBORG": {"ad": "Türk Tuborg", "sektor": "Sınai"},
+            "TEKTU": {"ad": "Tek-Art Turizm", "sektor": "Sınai"},
+            "TMPOL": {"ad": "Temapol Polimer", "sektor": "Sınai"},
+            "TMSN": {"ad": "Tümosan", "sektor": "Sınai"},
+            "TOASO": {"ad": "Tofaş", "sektor": "Sınai"},
+            "TRCAS": {"ad": "Turcas Petrol", "sektor": "Sınai"},
+            "TRILC": {"ad": "Türk İlaç Serum", "sektor": "Sınai"},
+            "TTRAK": {"ad": "Türk Traktör", "sektor": "Sınai"},
+            "TUKAS": {"ad": "Tukaş", "sektor": "Sınai"},
+            "TUPRS": {"ad": "Tüpraş", "sektor": "Sınai"},
+            "UFUK": {"ad": "Ufuk Yatırım", "sektor": "Sınai"},
+            "ULAS": {"ad": "Ulaşlar Turizm", "sektor": "Sınai"},
+            "ULKER": {"ad": "Ülker", "sektor": "Sınai"},
+            "USAK": {"ad": "Uşak Seramik", "sektor": "Taş Toprak"},
+            "VANGD": {"ad": "Vanet Gıda", "sektor": "Sınai"},
+            "VESBE": {"ad": "Vestel Beyaz Eşya", "sektor": "Sınai"},
+            "VESTL": {"ad": "Vestel", "sektor": "Sınai"},
+            "VKING": {"ad": "Viking Kağıt", "sektor": "Sınai"},
+            "YAPRK": {"ad": "Yaprak Süt", "sektor": "Sınai"},
+            "YATAS": {"ad": "Yataş", "sektor": "Sınai"},
+            "YESIL": {"ad": "Yeşil Yatırım", "sektor": "Sınai"},
+            "YUNSA": {"ad": "Yünsa", "sektor": "Sınai"},
+
+            "AEFES": {"ad": "Anadolu Efes", "sektor": "Gıda"},
+            "ALKLC": {"ad": "Altın Kılıç Gıda", "sektor": "Gıda"},
+            "ARMGD": {"ad": "Arzum Ev Aletleri", "sektor": "Gıda"},
+            "ATAKP": {"ad": "Atakey Patates", "sektor": "Gıda"},
+            "AVOD": {"ad": "Avod Kurutulmuş Gıda", "sektor": "Gıda"},
+            "BALSU": {"ad": "Balsu Gıda", "sektor": "Gıda"},
+            "BANVT": {"ad": "Banvit", "sektor": "Gıda"},
+            "BESLR": {"ad": "Besler Gıda", "sektor": "Gıda"},
+            "BORSK": {"ad": "Bor Şeker", "sektor": "Gıda"},
+            "CCOLA": {"ad": "Coca Cola İçecek", "sektor": "Gıda"},
+            "CEMZY": {"ad": "Cem Zeytin", "sektor": "Gıda"},
+            "DARDL": {"ad": "Dardanel", "sektor": "Gıda"},
+            "DMRGD": {"ad": "Dmr Unlu Mamuller", "sektor": "Gıda"},
+            "DURKN": {"ad": "Durukan Şekerleme", "sektor": "Gıda"},
+            "EFOR": {"ad": "Efor Yatırım", "sektor": "Gıda"},
+            "EKSUN": {"ad": "Eksun Gıda", "sektor": "Gıda"},
+            "ERSU": {"ad": "Ersu Gıda", "sektor": "Gıda"},
+            "FADE": {"ad": "Fade Gıda", "sektor": "Gıda"},
+            "FRIGO": {"ad": "Frigo Pak Gıda", "sektor": "Gıda"},
+            "GOKNR": {"ad": "Göknur Gıda", "sektor": "Gıda"},
+            "GUNDG": {"ad": "Gündoğdu Gıda", "sektor": "Gıda"},
+            "KAYSE": {"ad": "Kayseri Şeker", "sektor": "Gıda"},
+            "KRSTL": {"ad": "Kristal Kola", "sektor": "Gıda"},
+            "KRVGD": {"ad": "Kervan Gıda", "sektor": "Gıda"},
+            "MERKO": {"ad": "Merko Gıda", "sektor": "Gıda"},
+            "OBAMS": {"ad": "Oba Makarnacılık", "sektor": "Gıda"},
+            "OFSYM": {"ad": "Ofis Yem Gıda", "sektor": "Gıda"},
+            "OYLUM": {"ad": "Oylum Sınai Yatırımlar", "sektor": "Gıda"},
+            "PENGD": {"ad": "Penguen Gıda", "sektor": "Gıda"},
+            "PETUN": {"ad": "Pınar Et ve Un", "sektor": "Gıda"},
+            "PINSU": {"ad": "Pınar Su", "sektor": "Gıda"},
+            "PNSUT": {"ad": "Pınar Süt", "sektor": "Gıda"},
+            "SEGMN": {"ad": "Segmen Kardeşler Gıda", "sektor": "Gıda"},
+            "SOKE": {"ad": "Söke Değirmencilik", "sektor": "Gıda"},
+            "TATGD": {"ad": "Tat Gıda", "sektor": "Gıda"},
+            "TBORG": {"ad": "Türk Tuborg", "sektor": "Gıda"},
+            "TUKAS": {"ad": "Tukaş", "sektor": "Gıda"},
+            "ULKER": {"ad": "Ülker Bisküvi", "sektor": "Gıda"},
+            "ULUUN": {"ad": "Ulusoy Un", "sektor": "Gıda"},
+            "VANGD": {"ad": "Vanet Gıda", "sektor": "Gıda"},
+            "YYLGD": {"ad": "Yayla Gıda", "sektor": "Gıda"},
+
+            "ASELS": {"ad": "Aselsan", "sektor": "Savunma/Teknoloji"},
+            "MIATK": {"ad": "Mia Teknoloji", "sektor": "Savunma/Teknoloji"},
+            "REEDR": {"ad": "Reeder Teknoloji", "sektor": "Savunma/Teknoloji"},
+            "SDTTR": {"ad": "SDT Savunma", "sektor": "Savunma/Teknoloji"},
+            "KCHOL": {"ad": "Koç Holding", "sektor": "Holding"},
+            "SAHOL": {"ad": "Sabancı Holding", "sektor": "Holding"},
+            "AGHOL": {"ad": "AG Anadolu Grubu", "sektor": "Holding"},
+            "DOHOL": {"ad": "Doğan Holding", "sektor": "Holding"},
+            "TKFEN": {"ad": "Tekfen Holding", "sektor": "Holding"},
+            "ALARK": {"ad": "Alarko Holding", "sektor": "Holding"},
+            "GSDHO": {"ad": "GSD Holding", "sektor": "Holding"},
+            "IHLAS": {"ad": "İhlas Holding", "sektor": "Holding"},
+            "SISE": {"ad": "Şişecam", "sektor": "Holding"},  # Cam ama dev bir holding yapısıdır
+            "METRO": {"ad": "Metro Holding", "sektor": "Holding"},
+            "VERUS": {"ad": "Verusa Holding", "sektor": "Holding"},
+            "DERHL": {"ad": "Derluks Yatırım Hol.", "sektor": "Holding"},
+            "HEDEF": {"ad": "Hedef Holding", "sektor": "Holding"},
+            "POLHO": {"ad": "Polisan Holding", "sektor": "Holding"},
+            "LYDHO": {"ad": "Lydia Holding", "sektor": "Holding"},
+
+
+            # YATIRIM VE GİRİŞİM SERMAYESİ
+            "BRYAT": {"ad": "Borusan Yatırım", "sektor": "Yatırım"},
+            "ISMEN": {"ad": "İş Yatırım Menkul", "sektor": "Yatırım"},
+            "INVEO": {"ad": "Inveo Yatırım", "sektor": "Yatırım"},
+            "GLYHO": {"ad": "Global Yatırım Hol.", "sektor": "Yatırım"},
+            "GOZDE": {"ad": "Gözde Girişim", "sektor": "Yatırım"},
+            "ISGSY": {"ad": "İş Girişim", "sektor": "Yatırım"},
+            "IDGYO": {"ad": "İdeal GYO / Yatırım", "sektor": "Yatırım"},
+            "BERA": {"ad": "Bera Holding", "sektor": "Yatırım"},
+            "HDFGS": {"ad": "Hedef Girişim", "sektor": "Yatırım"},
+            "VERTU": {"ad": "Verusaturk Girişim", "sektor": "Yatırım"},
+            "UNLU": {"ad": "Ünlü Yatırım Hol.", "sektor": "Yatırım"},
+            "GLRYH": {"ad": "Güler Yatırım Hol.", "sektor": "Yatırım"},
+            "DENGE": {"ad": "Denge Yatırım", "sektor": "Yatırım"},
+            "HUBVC": {"ad": "Hub Girişim", "sektor": "Yatırım"},
+            "YESIL": {"ad": "Yeşil Yatırım", "sektor": "Yatırım"},
+            "AVHOL": {"ad": "Avrupa Yatırım Hol.", "sektor": "Yatırım"},
+        }
+
+        semboller = [k + ".IS" for k in hisse_rehberi.keys()]
+        df = yf.download(semboller, period="1d", interval="30m", progress=False, threads=50,timeout=13.5)
+        if df.empty:
+            return "Veri Alınamadı"
+
+
+        fiyatlar = df['Close']
+        hacim = df['Volume']
+        hisse_listesi = []
+        for sembol in fiyatlar.columns:
+            temiz_kod = sembol.replace('.IS','')
+            uzun_isim = hisse_rehberi.get(temiz_kod, {}).get('ad', temiz_kod)
+            fiyat_seri = fiyatlar[sembol].dropna()
+            hacim_seri = hacim[sembol].dropna()
+            ilk_fiyat = fiyat_seri.iloc[0]
+            son_fiyat = fiyat_seri.iloc[-1]
+            hacim_toplam = float(hacim_seri.sum())
+            değişim = ((son_fiyat - ilk_fiyat) / ilk_fiyat) * 100
+            hisse_listesi.append({'name' : uzun_isim , 'fiyat' : float(round(son_fiyat,2)) , 'degisim' : float(round(değişim,2)), 'acılıs' : float(round(ilk_fiyat,2)),'Hacim' : hacim_toplam,'sektor': hisse_rehberi.get(temiz_kod, {}).get('sektor', 'Diger')})
+
+        hisse_listesi.sort(key=lambda x: x['fiyat'],reverse=True)
+        return render_template("/borsa_menu.html",veriler=hisse_listesi)
+    except ValueError:
+        return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
+    except KeyError:
+        return "<h1>Veri Formatı Eksik Veya Hatalı</h1>"
+    except ConnectionError:
+        return "<h1>Bağlantı Hatası : Lütfen İnternetinizi Kontrol Edin</h1>"
+    except ZeroDivisionError:
+        return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
+    except Exception:
+        return "<h1>Sistemsel Bir Hata oluştu"
 
 
 
