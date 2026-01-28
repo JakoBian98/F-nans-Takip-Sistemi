@@ -105,11 +105,17 @@ def Finance():
             son_fiyat = ema_df['Close'].iloc[-1]
             alış_sinyali = 0
             satış_sinyali = 0
+            alış_sinyali_sma = 0
+            satış_sinyali_sma = 0
             for p in periyotlar:
                 sütun_adı = f"EMA-{p}"
+                sma_sütun_adı = f"SMA-{p}"
                 ema_değeri = ema_df['Close'].ewm(span=p,adjust=False).mean()
+                sma_değeri = ema_df['Close'].rolling(window=p).mean()
+                güncel_sma = float(sma_değeri.iloc[-1])
                 güncel_ema = float(ema_değeri.iloc[-1])
                 ema_listesi_sözlük[sütun_adı] = round(güncel_ema,2)
+
 
                 if son_fiyat > güncel_ema:
                     alış_sinyali += 1
@@ -118,6 +124,15 @@ def Finance():
                     satış_sinyali += 0
                 else:
                     satış_sinyali += 1
+
+                if son_fiyat > güncel_sma:
+                    alış_sinyali_sma += 1
+                elif son_fiyat == güncel_sma:
+                    alış_sinyali_sma += 0
+                    satış_sinyali_sma += 0
+                else:
+                    satış_sinyali_sma += 1
+
 
                 if alış_sinyali > 7:
                     gösterge = "Güçlü Al"
@@ -135,12 +150,38 @@ def Finance():
                     gösterge = "NÖTR/BEKLE"
                     ema_renk = "warning"
 
+                if alış_sinyali_sma > 7:
+                    sma_gösterge = "Güçlü Al"
+                    sma_renk = "succes"
+                elif alış_sinyali_sma >5:
+                    sma_gösterge = "Al"
+                    sma_renk = "succes"
+                else:
+                    sma_gösterge = "Nötr/Bekle"
+                    sma_renk = 'warning'
+
+                if satış_sinyali_sma > 7:
+                    sma_gösterge = "Güçlü Sat"
+                    sma_renk = "danger"
+                elif satış_sinyali_sma >5:
+                    sma_gösterge = "Güçlü Sat"
+                    sma_renk = "danger"
+                else:
+                    sma_gösterge = "Nötr/Bekle"
+                    sma_renk = 'warning'
+
+
+
                 ema_listesi_tablo.append({
                     'periyot': f"EMA-{p}",
                     'deger': güncel_ema,
-                    'sinyal': gösterge,
+                    'sinyal_ema': gösterge,
+                    'sinyal_sma' : sma_gösterge,
+                    'sma_renk' : sma_renk,
                     'renk': ema_renk
                 })
+
+
 
 
             if öneriler is not None and not öneriler.empty:
@@ -484,6 +525,8 @@ def hacim_bilgisi():
                 trend_renk = "info"
 
             hacim_fark_yüzde = ((son_hacim - ilk_hacim) / ilk_hacim) * 100
+            x_ekseni = df.index.strftime('%H:%M' if "m" in interval else '%d.%m.%y').tolist()
+            y_ekseni = np.array(df['Volume'].values).flatten().tolist()
             if son_hacim > ortalama_hacim + hacim_std:
                 renk = "red"
             elif son_hacim < ortalama_hacim - hacim_std:
@@ -491,19 +534,12 @@ def hacim_bilgisi():
             else:
                 renk = "green"
 
-            fig , ax = plt.subplots(figsize=(12,6),dpi=150)
-            ax.plot(tarih,hacim,alpha=0.2,color=renk,linewidth=2)
-            ax.fill_between(tarih,hacim,alpha=0.4,color=renk,interpolate=True)
-            ax.set_xlabel("Zaman")
-            ax.set_ylabel("Hacim")
-            ax.set_title(f"{sembol} Hacim Değişimi : (%){hacim_fark_yüzde} (Hacim-Zaman Grafiği)")
-            ax.grid(True,alpha=0.090)
-            plt.tight_layout()
-            img = io.BytesIO()
-            plt.savefig(img, format='png', bbox_inches='tight', dpi=150)
-            img.seek(0)
-            hacim_grafik_url = base64.b64encode(img.getvalue()).decode('utf8')
-            plt.close()
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(x=x_ekseni,y=y_ekseni,fill='tozeroy',mode='lines',line=dict(color='#00ffbb', width=2),fillcolor='rgba(0, 255, 187, 0.1)',name='Hacim',hovertemplate='<b>Tarih:</b> %{x}<br><b>Hacim:</b> %{y:,.0f}<extra></extra>'))
+            fig.add_hline(y=ortalama_hacim,line_color='gray',opacity=0.3,line_dash='dash')
+            fig.update_layout(template='plotly_dark',paper_bgcolor='rgba(0,0,0,0)',plot_bgcolor='rgba(0,0,0,0)',margin=dict(l=10, r=10, t=10, b=10),xaxis=dict(showgrid=False, color='#64748b'),yaxis=dict(showgrid=True, gridcolor='#1e293b', color='#64748b'),hovermode='x unified')
+            hacim_json = json.dumps(fig,cls=PlotlyJSONEncoder)
+
 
             return render_template("hacimsonuc.html",ortalama_hacim=ortalama_hacim,
                        son_hacim=son_hacim,
@@ -516,9 +552,8 @@ def hacim_bilgisi():
                        min_volume_idx=min_volume_idx,
                        z_skor=z_skor,
                        renk=renk,ilk_tarih=df.index[0].strftime("%Y-%m-%d"),
-                       son_tarih=df.index[-1].strftime("%Y-%m-%d"),hacim_grafik_url=hacim_grafik_url,hacim_fark_yüzde=round(hacim_fark_yüzde),ilk_hacim=ilk_hacim,
+                       son_tarih=df.index[-1].strftime("%Y-%m-%d"),hacim_json=hacim_json,hacim_fark_yüzde=round(hacim_fark_yüzde),ilk_hacim=ilk_hacim,
                        trend_renk=trend_renk,trend_ikon=trend_ikon,trend_mesaj=trend_mesaj,fiyat_değişim=fiyat_değişim)
-
     except ValueError:
         return "<h1>Seçtiğiniz Kriterlere Uygun Veri Bulunamadı </h1>"
     except KeyError:
@@ -529,6 +564,8 @@ def hacim_bilgisi():
         return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
     except Exception:
         return "<h1>Sistemsel Bir Hata oluştu"
+
+
 
 @app.route("/Grafikler")
 def grafikler():
@@ -706,42 +743,43 @@ def çoklu_grafikler_penceresi():
 
         df1_değişim = df1['Close'].iloc[-1] - df1.iloc[0]
         df2_değişim = df2.iloc[-1] - df2.iloc[0]
-        df1_yüzde = (df1_değişim / fiyat1.iloc[0]) * 100
-        df2_yüzde = (df2_değişim / fiyat2.iloc[0]) * 100
+        df1_yuzde = (df1_değişim / fiyat1.iloc[0]) * 100
+        df2_yuzde = (df2_değişim / fiyat2.iloc[0]) * 100
         df1_baslangic_fiyat = float(df1["Close"].iloc[0])
         df1_son_fiyat = float(df1["Close"].iloc[-1])
         df2_baslangic_fiyat = float(df2["Close"].iloc[0])
         df2_son_fiyat = float(df2["Close"].iloc[-1])
-        df1_yüzde_serisi = (fiyat1 / fiyat1.iloc[0] - 1) * 100
-        df2_yüzde_serisi = (fiyat2 / fiyat2.iloc[0] - 1) * 100
+        df1_yuzde_serisi = (fiyat1 / fiyat1.iloc[0] - 1) * 100
+        df2_yuzde_serisi = (fiyat2 / fiyat2.iloc[0] - 1) * 100
+        x_ekseni = df1.index.strftime('%d.%m.%y %H:%M' if "m" in interval else '%d.%m.%y').tolist()
+        fig = go.Figure()
 
 
-        plt.switch_backend('Agg')
-        plt.clf()
-        fig, ax = plt.subplots(figsize=(12, 6))
+        fig.add_trace(go.Scatter(x=x_ekseni,y=df1_yuzde_serisi.values.flatten().tolist(),mode='lines',line=dict(color='#6366f1', width=3),name=f"{sembol1} (%)",hovertemplate='%{y:.2f}%'))
+        fig.add_trace(go.Scatter(x=x_ekseni,y=df2_yuzde_serisi.values.flatten().tolist(),mode='lines',line=dict(color='#f43f5e', width=3),name=f"{sembol2} (%)",hovertemplate='%{y:.2f}%'))
+        fig.update_layout(template='plotly_dark',paper_bgcolor="#0f172a",
+            plot_bgcolor="#0f172a",hovermode='x unified',legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            margin=dict(l=20, r=20, t=50, b=20),
+            xaxis=dict(
+                showgrid=True, gridcolor='rgba(255,255,255,0.05)',
+                type='category', nticks=10
+            ),
+            yaxis=dict(
+                showgrid=True, gridcolor='rgba(255,255,255,0.05)',
+                title="Getiri (%)", side="right", ticksuffix="%"
+            )
+        )
+        karşılaştırma_json = json.dumps(fig,cls=PlotlyJSONEncoder)
 
-        ax.plot(df1.index,df1_yüzde_serisi,label=f"{sembol1} (%)",linewidth=2.5,color="#3182ce")
-        ax.plot(df2.index,df2_yüzde_serisi,label=f"{sembol2} (%)",linewidth=2.5,color="#e53e3e")
-        ax.set_title(f"{sembol1} Değişim : {df1_değişim} (%{df1_yüzde}) {sembol2} Değişim : {df2_değişim} (%{df2_yüzde})")
 
-        ax.set_ylabel("Bağıl Getiri (%)")
-        ax.legend()
-        ax.grid(True, linestyle='--', alpha=0.5)
-
-
-        img = io.BytesIO()
-        fig.savefig(img, format='png', bbox_inches='tight')
-        img.seek(0)
-        grafik_url = base64.b64encode(img.getvalue()).decode('utf8')
-        plt.close(fig)
 
         return render_template("ikilianalizpaneli.html",
-                               grafik=grafik_url,
+                               grafik=karşılaştırma_json,
                                hisse=f"{sembol1} vs {sembol2}",
                                sembol1=sembol1,
                                sembol2=sembol2,
-                               df1_yuzde=df2_yüzde.iloc[-1],
-                               df2_yuzde=df2_yüzde.iloc[-1],
+                               df1_yuzde=df2_yuzde.iloc[-1],
+                               df2_yuzde=df2_yuzde.iloc[-1],
                                df1_baslangic_fiyat=df1_baslangic_fiyat,
                                df1_son_fiyat=df1_son_fiyat,
                                df2_baslangic_fiyat=df2_baslangic_fiyat,
@@ -769,7 +807,7 @@ def dolar_bazlı_grafik_ekranı():
         period = request.form.get("period")
         interval = request.form.get("interval")
         dovız_tipi = request.form.get("kur_tipi")
-        sembol_df = yf.download(sembol, period=period, interval=interval, progress=False)
+        sembol_df = yf.download(sembol, period=period, interval=interval, progress=False,auto_adjust=True)
         usd_df = yf.download(dovız_tipi, period=period, interval=interval, progress=False)
         veri = yf.Ticker(sembol)
         data = veri.info
@@ -805,14 +843,14 @@ def dolar_bazlı_grafik_ekranı():
             ortak = sembol_df.index.intersection(usd_df.index)
             dolar_bazlı_seri = sembol_df.loc[ortak, "Close"] / usd_df.loc[ortak, "Close"]
 
+
         dolar_bazlı_seri = dolar_bazlı_seri.dropna()
         en_yüksek = float(dolar_bazlı_seri.max())
         en_düşük = float(dolar_bazlı_seri.min())
 
-
-
         ilk_fiyat = float(dolar_bazlı_seri.iloc[0])
         son_fiyat = float(dolar_bazlı_seri.iloc[-1])
+
 
         değişim = son_fiyat - ilk_fiyat
         toplam_degisim_yuzde = ((son_fiyat - ilk_fiyat) / ilk_fiyat) * 100
@@ -826,6 +864,12 @@ def dolar_bazlı_grafik_ekranı():
 
         x_ekseni = dolar_bazlı_seri.index.tz_localize(None).strftime('%d.%m.%y %H:%M' if 'm' in interval else '%d.%m.%y').tolist()
         y_ekseni = dolar_bazlı_seri.values.flatten().tolist()
+        ohlc = ['Open', 'High', 'Low', 'Close']
+        df_bazlı = pd.DataFrame(index=ortak_tarihler)
+        for col in ohlc:
+            df_bazlı[col] = sembol_df.loc[ortak_tarihler,col] / usd_df.loc[ortak_tarihler,'Close']
+
+
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(
@@ -840,12 +884,33 @@ def dolar_bazlı_grafik_ekranı():
         fig.add_hline(y=en_yüksek,line_color="green",line_dash='dash',opacity=0.3)
         fig.add_hline(y=en_düşük,line_color="red",line_dash='dash',opacity=0.3)
 
+
+
         fig.update_layout(template='plotly_dark',paper_bgcolor="#020617",plot_bgcolor="#020617",xaxis=dict(type='category', nticks=12, gridcolor="rgba(255,255,255,0.05)"),yaxis=dict(side="right", gridcolor="rgba(255,255,255,0.05)", tickformat=".4f"),margin=dict(l=10,r=10,t=10,b=40),hovermode='x unified')
+        fig_candle = go.Figure()
+        fig_candle.add_trace(go.Candlestick(x=x_ekseni,open=df_bazlı['Open'].tolist(),
+        close=df_bazlı['Close'].tolist(),high=df_bazlı['High'].tolist(),low=df_bazlı['Low'].tolist(),increasing_line_color='#00ffbb',
+        decreasing_line_color='#ff4b5c',
+        name=f"{sembol} / {dovız_tipi}"))
+        fig_candle.add_hline(y=en_yüksek,line_color='green',line_dash='dash',opacity=0.3)
+        fig_candle.add_hline(y=en_düşük,line_color='red',line_dash='dash',opacity=0.3)
+        fig_candle.update_layout(
+            template='plotly_dark',
+            paper_bgcolor="#020617",
+            plot_bgcolor="#020617",
+            xaxis=dict( nticks=12, rangeslider_visible=False),
+            yaxis=dict(side="right", tickformat=".4f"),
+            margin=dict(l=10, r=10, t=10, b=40),
+            hovermode='x unified'
+        )
+
         grafik_json = json.dumps(fig, cls=PlotlyJSONEncoder)
+        grafik_mum_json = json.dumps(fig_candle,cls=PlotlyJSONEncoder)
 
 
 
         return render_template("Dolar_Bazlı_Grafik.html",
+                               grafik_mum_json=grafik_mum_json,
                                long_name = long_name,
                                grafik=grafik_json,
                                sembol=sembol,
@@ -865,6 +930,8 @@ def dolar_bazlı_grafik_ekranı():
 
 
 
+
+
 @app.route("/USD_HACİM")
 def usd_hacim():
     return render_template("usd_hacim.html")
@@ -878,6 +945,10 @@ def usd_hacim_analiz():
 
         df = yf.download(sembol, period=period, interval=interval, progress=False)
         usd_df = yf.download("USDTRY=X", period=period, interval=interval, progress=False)
+        if df.empty:
+            return "<h1>Hisse Senedi Verisi Çekilemedi</h1>"
+        if usd_df.empty:
+            return "<h1>Döviz Verisi Çekilemedi </h1>"
         if isinstance(df.columns, pd.MultiIndex):
             df.columns = df.columns.get_level_values(0)
         if isinstance(usd_df.columns, pd.MultiIndex):
@@ -887,6 +958,8 @@ def usd_hacim_analiz():
         usd_df = usd_df.loc[:, ~usd_df.columns.duplicated()]
 
         common_dates = df.index.intersection(usd_df.index)
+        if len(common_dates) == 0:
+            return "<h1>Hisse Ve Döviz Verileri Çakışmıyor"
         df = df.loc[common_dates]
         usd_df = usd_df.loc[common_dates]
 
@@ -903,28 +976,49 @@ def usd_hacim_analiz():
         en_yüksek_tarih = usd_hacim_serisi.idxmax().strftime("%Y.%m.%d")
         en_düşük_hacim = float(usd_hacim_serisi.min())
         en_düşük_tarih = usd_hacim_serisi.idxmin().strftime("%Y.%m.%d")
+        renk = "#00ffbb" if son_usd_hacim >= ilk_usd_hacim else "#ff4b5c"
+        x_ekseni = df.index.strftime('%Y-%m-%d %H:%M').tolist()
+        y_ekseni = df['USD_VOLUME'].values.tolist()
+
 
         değişim = son_usd_hacim - ilk_usd_hacim
-        if değişim > 0:
-            renk = "green"
-        elif değişim < 0:
-            renk = "red"
-        else:
-            renk = "gray"
 
-        fig, ax = plt.subplots(figsize=(12, 6), dpi=150)
-        ax.plot(tarih, usd_hacim_serisi, linewidth=2, alpha=0.2, color=renk)
-        ax.fill_between(tarih, usd_hacim_serisi, color=renk, alpha=0.5)
-        ax.set_title(f"{sembol} Dolar Bazlı Hacim-Zaman Grafiği Değişim : (%){usd_hacim_fark_yuzde}")
-        ax.grid(True, alpha=0.090)
-        plt.legend()
-        img = io.BytesIO()
-        plt.savefig(img, format='png', bbox_inches='tight', facecolor=fig.get_facecolor())
-        img.seek(0)
-        usd_hacim_grafik_url = base64.b64encode(img.getvalue()).decode('utf8')
-        plt.close()
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=x_ekseni,
+            y=y_ekseni,
+            mode="lines",
+            line=dict(color="#00ffbb", width=2),
+            name=f"{sembol} HACİM-ZAMAN GRAFİĞİ"
+        ))
+
+        fig.add_hline(y=en_yüksek_hacim, line_color='green', line_dash='dash', opacity=0.3)
+        fig.add_hline(y=en_düşük_hacim,line_color='red',line_dash='dash',opacity=0.3)
+
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="#020617",
+            plot_bgcolor="#020617",
+            hovermode="x unified",
+            xaxis=dict(
+                type='date',
+                tickangle=-45,
+                nticks=15,
+                title="Zaman",
+                gridcolor="rgba(255,255,255,0.05)"
+            ),
+            yaxis=dict(
+                title="Fiyat",
+                side="right",
+                gridcolor="rgba(255,255,255,0.05)"
+            ),
+            margin=dict(l=40, r=40, t=30, b=40)
+        )
+
+        usd_hacim_json = json.dumps(fig,cls=PlotlyJSONEncoder)
         return render_template("usd_hacim_sonuc.html",
-                               usd_hacim_grafik_url=usd_hacim_grafik_url,
+                               usd_hacim_grafik_url=usd_hacim_json ,
                                sembol=sembol,
                                son_usd_hacim=son_usd_hacim,
                                usd_hacim_fark_yuzde=usd_hacim_fark_yuzde, en_yüksek_hacim=en_yüksek_hacim,
@@ -940,6 +1034,7 @@ def usd_hacim_analiz():
         return "<h1>Sistemde Matematiksel Hata Saptandı</h1>"
     except Exception:
         return "<h1>Sistemsel Bir Hata oluştu"
+
 
 
 @app.route("/Coinler_Paneli")
