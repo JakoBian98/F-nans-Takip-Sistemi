@@ -140,6 +140,9 @@
             border-radius: 6px;
             font-size: 11px;
             font-weight: 800;
+            display: inline-block;
+            min-width: 80px;
+            text-align: center;
         }
 
         .bg-success-soft { background: rgba(16, 185, 129, 0.2); color: var(--success); }
@@ -281,7 +284,7 @@
 
         <div class="glass-card full-width-card">
             <div class="card-title">
-                <i class="fas fa-microchip"></i> TEKNİK ANALİZ RADARI (EMA SİNYALLERİ)
+                <i class="fas fa-microchip"></i> TEKNİK ANALİZ RADARI (EMA vs SMA KARŞILAŞTIRMASI)
             </div>
             <div style="overflow-x: auto;">
                 <table class="ema-table">
@@ -289,8 +292,9 @@
                         <tr>
                             <th>PERİYOT</th>
                             <th>EMA DEĞERİ</th>
+                            <th>EMA SİNYAL</th>
+                            <th>SMA SİNYAL</th>
                             <th>FİYAT KONUMU</th>
-                            <th>SİNYAL</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -299,19 +303,27 @@
                             <td><span style="color: var(--accent); font-weight: 700;">{{ item.periyot }}</span></td>
                             <td>{{ "{:,.2f}".format(item.deger) }}</td>
                             <td>
+                                <span class="badge-signal
+                                    {% if item.renk|lower == 'success' or item.renk|lower == 'succes' %}bg-success-soft
+                                    {% elif item.renk|lower == 'danger' %}bg-danger-soft
+                                    {% else %}bg-warning-soft{% endif %}">
+                                    {{ item.sinyal_ema }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge-signal
+                                    {% if item.sma_renk|lower == 'success' or item.sma_renk|lower == 'succes' %}bg-success-soft
+                                    {% elif item.sma_renk|lower == 'danger' %}bg-danger-soft
+                                    {% else %}bg-warning-soft{% endif %}">
+                                    {{ item.sinyal_sma }}
+                                </span>
+                            </td>
+                            <td>
                                 {% if kapanıs > item.deger %}
                                 <i class="fas fa-chevron-up" style="color: var(--success);"></i> Üzerinde
                                 {% else %}
                                 <i class="fas fa-chevron-down" style="color: var(--danger);"></i> Altında
                                 {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge-signal
-                                    {% if item.renk|lower == 'success' or item.renk|lower == 'succes' %}bg-success-soft
-                                    {% elif item.renk|lower == 'danger' %}bg-danger-soft
-                                    {% else %}bg-warning-soft{% endif %}">
-                                    {{ item.sinyal }}
-                                </span>
                             </td>
                         </tr>
                         {% endfor %}
@@ -321,12 +333,10 @@
             <div class="status-box status-neutral" style="margin-top: 20px;">
                 <i class="fas fa-info-circle"></i>
                 <strong>Analiz Notu:</strong>
-                Fiyatın en uzun vade olan EMA-200 ({{ ema_sözlük['EMA-200'] if ema_sözlük and 'EMA-200' in ema_sözlük else 'N/A' }}) üzerinde olması, ana trendin boğa piyasasında olduğunu gösterir.
+                Fiyatın en uzun vade olan EMA-200 ({{ ema_sözlük['EMA-200'] if ema_sözlük and 'EMA-200' in ema_sözlük else 'N/A' }}) üzerinde olması, ana trendin boğa piyasasında olduğunu doğrular.
             </div>
         </div>
-
         <a href="/" class="btn-new"><i class="fas fa-search"></i> YENİ SORGULAMA YAP</a>
-
     </div>
 
 </body>
