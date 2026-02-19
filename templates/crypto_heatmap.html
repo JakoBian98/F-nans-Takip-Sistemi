@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAPHIA | BINANCE TOP 300 HEATMAP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --bg-card: #0f172a;
+            --accent: #f7931a;
+            --border: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--bg-deep);
+            border-bottom: 1px solid var(--border);
+            z-index: 10;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Fira Code', monospace;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 10px 15px 5px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow: hidden; /* Dışarı taşmayı engelle */
+        }
+
+        .map-wrapper {
+            flex: 1;
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden; /* ÖNEMLİ: Zoom yapınca harita buradan dışarı çıkmaz */
+        }
+
+        /* ZOOM YAPILACAK ALAN */
+        #zoom-container {
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0; /* Sol üstten büyüme başlar */
+            transition: transform 0.1s ease-out;
+            cursor: grab;
+        }
+
+        #zoom-container:active { cursor: grabbing; }
+
+        .nav-link { text-decoration: none; color: var(--text-dim); font-family: 'Fira Code', monospace; font-size: 13px; }
+        .footer-info { display: flex; gap: 20px; font-size: 11px; color: var(--text-dim); padding: 5px 10px; }
+        .dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .dot-green { background: #00ffbb; }
+        .dot-red { background: #ff4b5c; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">
+            <i class="fa-brands fa-bitcoin"></i> GRAPHIA_CRYPTO / BINANCE_HEATMAP
+        </div>
+        <a href="/" class="nav-link"><i class="fa-solid fa-terminal"></i> [ BACK_TO_TERMINAL ]</a>
+    </nav>
+
+    <div class="main-content">
+        <div class="map-wrapper" id="wrapper">
+            <div id="zoom-container">
+                {{ graph_html | safe }}
+            </div>
+        </div>
+
+        <div class="footer-info">
+            <span><span class="dot dot-green"></span> ACCUMULATION</span>
+            <span><span class="dot dot-red"></span> DISTRIBUTION</span>
+            <span>| SCROLL TO ZOOM | DRAG TO PAN</span>
+            <span id="update-timer" style="margin-left: auto;">AUTO_REFRESH: ACTIVE</span>
+        </div>
+    </div>
+
+    <script>
+        // --- JAVASCRIPT ZOOM MANTIĞI ---
+        const container = document.getElementById('zoom-container');
+        const wrapper = document.getElementById('wrapper');
+
+        let scale = 1;
+        let pointX = 0;
+        let pointY = 0;
+        let start = { x: 0, y: 0 };
+        let isDragging = false;
+
+        function setTransform() {
+            container.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+        }
+
+        wrapper.onwheel = function (e) {
+            e.preventDefault();
+            var xs = (e.clientX - pointX) / scale,
+                ys = (e.clientY - pointY) / scale,
+                delta = (e.wheelDelta ? e.wheelDelta : -e.deltaY);
+            (delta > 0) ? (scale *= 1.2) : (scale /= 1.2);
+
+            // Zoom sınırları
+            scale = Math.min(Math.max(1, scale), 10);
+
+            pointX = e.clientX - xs * scale;
+            pointY = e.clientY - ys * scale;
+
+            // Kenar sınırları (Dışarı kaçmasın)
+            if(scale === 1) { pointX = 0; pointY = 0; }
+
+            setTransform();
+        }
+
+        wrapper.onmousedown = function (e) {
+            e.preventDefault();
+            start = { x: e.clientX - pointX, y: e.clientY - pointY };
+            isDragging = true;
+        }
+
+        window.onmouseup = function (e) { isDragging = false; }
+
+        window.onmousemove = function (e) {
+            e.preventDefault();
+            if (!isDragging) return;
+            pointX = (e.clientX - start.x);
+            pointY = (e.clientY - start.y);
+            setTransform();
+        }
+
+        // Resize Fix
+        window.onresize = function() {
+            const plotDiv = document.querySelector('.js-plotly-plot');
+            if (plotDiv && window.Plotly) { Plotly.Plots.resize(plotDiv); }
+        };
+    </script>
+
+</body>
+</html>
