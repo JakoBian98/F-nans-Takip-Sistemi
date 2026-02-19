@@ -90,7 +90,7 @@
             color: var(--text-dim);
         }
 
-        input[type="text"] {
+        input[type="text"], select {
             width: 100%;
             background: #0f172a;
             border: 2px solid #334155;
@@ -101,15 +101,47 @@
             font-weight: 600;
             box-sizing: border-box;
             transition: all 0.3s;
+            appearance: none; /* Standart ok işaretini kaldır */
         }
 
-        input[type="text"]:focus {
+        /* Dil seçimi özel stili */
+        .language-wrapper {
+            position: relative;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .language-wrapper label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-left: 5px;
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 800;
+        }
+
+        /* Select kutusunun içindeki listeyi sınırlama (Kaydırma için) */
+        select[name="Dil"] {
+            cursor: pointer;
+            padding-left: 45px;
+        }
+
+        .language-wrapper i {
+            position: absolute;
+            left: 15px;
+            bottom: 17px;
+            color: var(--text-dim);
+            z-index: 10;
+        }
+
+        input[type="text"]:focus, select:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
         }
 
-        /* Yeni Opsiyon Butonları Alanı */
         .quick-options {
             display: flex;
             justify-content: center;
@@ -177,6 +209,12 @@
         .footer-links a:hover {
             color: var(--accent);
         }
+
+        /* Select içindeki option'ların koyu teması (Bazı tarayıcılar için) */
+        option {
+            background: #1e293b;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -200,9 +238,55 @@
                 <div class="quick-options">
                     <button type="button" class="opt-btn" onclick="selectSymbol('USDTRY=X')">USD/TRY</button>
                     <button type="button" class="opt-btn" onclick="selectSymbol('EURTRY=X')">EUR/TRY</button>
-                    <button type="button" class="opt-btn" onclick="selectSymbol('CHFTRY=X')">CHF/TRY</button>
                     <button type="button" class="opt-btn" onclick="selectSymbol('THYAO.IS')">BIST:THY</button>
                     <button type="button" class="opt-btn" onclick="selectSymbol('BTC-USD')">BTC/USD</button>
+                </div>
+
+                <div class="language-wrapper">
+                    <label>Analiz Rapor Dili</label>
+                    <i class="fas fa-language"></i>
+                    <select name="Dil" required size="1" onfocus="this.size=5;" onblur="this.size=1;" onchange="this.size=1; this.blur();">
+                        <option value="Turkish" selected>Türkçe 🇹🇷</option>
+                        <option value="English">English 🇺🇸</option>
+                        <option value="German">Deutsch 🇩🇪</option>
+                        <option value="French">Français 🇫🇷</option>
+                        <option value="Spanish">Español 🇪🇸</option>
+                        <option value="Italian">Italiano 🇮🇹</option>
+                        <option value="Russian">Pусский 🇷🇺</option>
+                        <option value="Chinese">中文 🇨🇳</option>
+                        <option value="Japanese">日本語 🇯🇵</option>
+                        <option value="Korean">한국어 🇰🇷</option>
+                        <option value="Arabic">العربية 🇸🇦</option>
+                        <option value="Portuguese">Português 🇵🇹</option>
+                        <option value="Dutch">Nederlands 🇳🇱</option>
+                        <option value="Hindi">हिन्दी 🇮🇳</option>
+                        <option value="Azerbaijani">Azərbaycanca 🇦🇿</option>
+                        <option value="Greek">Ελληνικά 🇬🇷</option>
+                        <option value="Hebrew">עברית 🇮🇱</option>
+                        <option value="Swedish">Svenska 🇸🇪</option>
+                        <option value="Norwegian">Norsk 🇳🇴</option>
+                        <option value="Danish">Dansk DK</option>
+                        <option value="Finnish">Suomi 🇫🇮</option>
+                        <option value="Polish">Polski 🇵🇱</option>
+                        <option value="Czech">Čeština 🇨🇿</option>
+                        <option value="Hungarian">Magyar 🇭🇺</option>
+                        <option value="Romanian">Română 🇷🇴</option>
+                        <option value="Thai">ไทย 🇹🇭</option>
+                        <option value="Indonesian">Bahasa Indonesia 🇮🇩</option>
+                        <option value="Vietnamese">Tiếng Việt 🇻🇳</option>
+                        <option value="Persian">فارسی 🇮🇷</option>
+                        <option value="Ukrainian">Українська 🇺🇦</option>
+                        <option value="Bulgarian">Български 🇧🇬</option>
+                        <option value="Serbian">Српски 🇷🇸</option>
+                        <option value="Croatian">Hrvatski HR</option>
+                        <option value="Slovak">Slovenčina 🇸🇰</option>
+                        <option value="Malay">Bahasa Melayu 🇲🇾</option>
+                        <option value="Filipino">Filipino 🇵🇭</option>
+                        <option value="Bengali">বাংলা 🇧🇩</option>
+                        <option value="Urdu">اردو 🇵🇰</option>
+                        <option value="Kazakh">Қазақ тілі 🇰🇿</option>
+                        <option value="Uzbek">O'zbek tili 🇺🇿</option>
+                    </select>
                 </div>
 
                 <button type="submit" class="submit-btn">
