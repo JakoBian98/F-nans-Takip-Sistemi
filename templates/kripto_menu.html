@@ -4,35 +4,127 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="30">
-    <title>Kripto Canlı İzleme</title>
+    <title>CryptoPro | Canlı Veri Terminali</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: auto; }
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent-blue: #38bdf8;
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --up-color: #4ade80;
+            --down-color: #f87171;
+            --border: rgba(255, 255, 255, 0.05);
+        }
 
-        /* PC İÇİN TABLO TASARIMI */
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container { max-width: 1100px; margin: auto; }
+
+        /* Header Bölümü */
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+
+        .header-section h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        /* Masaüstü Tablo */
         .desktop-table {
-            width: 100%; background: white; border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-            border-collapse: collapse; overflow: hidden;
-            display: table; /* Masaüstünde tablo olarak göster */
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 16px;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            display: table;
         }
-        .desktop-table th, .desktop-table td { padding: 18px; text-align: left; border-bottom: 1px solid #edf2f7; }
-        .desktop-table th { background: #1a237e; color: white; font-size: 13px; text-transform: uppercase; }
 
-        /* MOBİL İÇİN KART TASARIMI (Başlangıçta gizli) */
-        .mobile-grid { display: none; grid-template-columns: 1fr; gap: 15px; }
+        .desktop-table th {
+            background: rgba(15, 23, 42, 0.5);
+            color: var(--text-dim);
+            padding: 20px;
+            text-align: left;
+            font-size: 12px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .desktop-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .desktop-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Veri Stilleri */
+        .coin-name { font-weight: 600; font-size: 1.1rem; }
+        .coin-symbol { color: var(--text-dim); font-size: 0.8rem; margin-left: 5px; }
+        .price { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-blue); }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+        }
+
+        .up { background: rgba(74, 222, 128, 0.1); color: var(--up-color); }
+        .down { background: rgba(248, 113, 113, 0.1); color: var(--down-color); }
+
+        /* Mobil Kartlar */
+        .mobile-grid { display: none; grid-template-columns: 1fr; gap: 12px; }
         .coin-card {
-            background: white; padding: 20px; border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #f7931a;
-            display: flex; justify-content: space-between; align-items: center;
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .up { color: #2e7d32; font-weight: bold; }
-        .down { color: #c62828; font-weight: bold; }
-        .price { font-weight: 800; color: #1a237e; }
+        /* Buton */
+        .btn-home {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+            font-weight: 500;
+        }
 
-        /* MEDYA SORGULARI: EKRAN DARALINCA TABLOYU GİZLE KARTLARI GÖSTER */
+        .btn-home:hover {
+            background: var(--accent-blue);
+            color: var(--bg-dark);
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 768px) {
             .desktop-table { display: none; }
             .mobile-grid { display: grid; }
@@ -42,29 +134,40 @@
 <body>
 
 <div class="container">
-    <div style="text-align:center; margin-bottom:30px;">
-        <h1 style="color:#1a237e;">₿ Kripto Canlı İzleme</h1>
-        <p style="color:#718096;"><i class="fas fa-sync-alt fa-spin"></i> 30 saniyede bir otomatik güncellenir</p>
+    <div class="header-section">
+        <h1><i class="fab fa-bitcoin"></i> CryptoTerminal</h1>
+        <p style="color: var(--text-dim);">
+            <i class="fas fa-circle-notch fa-spin" style="color: var(--up-color); font-size: 10px;"></i>
+            Piyasa Canlı Yayında (30s)
+        </p>
     </div>
 
     <table class="desktop-table">
         <thead>
             <tr>
-                <th>Coin / Parite</th>
-                <th>Anlık Fiyat</th>
-                <th>Günlük Değişim</th>
-                <th>İşlem</th>
+                <th>Varlık</th>
+                <th>Fiyat</th>
+                <th>24s Değişim</th>
+                <th>Aksiyon</th>
             </tr>
         </thead>
         <tbody>
             {% for item in veriler %}
             <tr>
-                <td style="font-weight:700;">{{ item.name }} <span style="color:#94a3b8; font-size:12px;">/ USD</span></td>
-                <td class="price">${{ item.price }}</td>
-                <td class="{% if item.degisim >= 0 %}up{% else %}down{% endif %}">
-                    {% if item.degisim >= 0 %}+{% endif %}{{ item.degisim }}%
+                <td>
+                    <span class="coin-name">{{ item.name }}</span>
+                    <span class="coin-symbol">USD</span>
                 </td>
-                <td><a href="/" style="text-decoration:none; color:#3949ab; font-size:12px;">İncele</a></td>
+                <td class="price">${{ "{:,.2f}".format(item.price) }}</td>
+                <td>
+                    <span class="badge {% if item.degisim >= 0 %}up{% else %}down{% endif %}">
+                        <i class="fas fa-caret-{% if item.degisim >= 0 %}up{% else %}down{% endif %}"></i>
+                        {{ item.degisim }}%
+                    </span>
+                </td>
+                <td>
+                    <a href="/" style="color: var(--text-dim);"><i class="fas fa-chart-line"></i></a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -74,19 +177,19 @@
         {% for item in veriler %}
         <div class="coin-card">
             <div>
-                <div style="font-size:12px; color:#718096; font-weight:800;">{{ item.name }}</div>
-                <div class="price">${{ item.price }}</div>
+                <div class="coin-name" style="font-size: 0.9rem;">{{ item.name }}</div>
+                <div class="price" style="font-size: 1.2rem;">${{ item.price }}</div>
             </div>
-            <div class="{% if item.degisim >= 0 %}up{% else %}down{% endif %}" style="font-size:18px;">
-                {% if item.degisim >= 0 %}+{% endif %}{{ item.degisim }}%
+            <div class="badge {% if item.degisim >= 0 %}up{% else %}down{% endif %}">
+                {{ item.degisim }}%
             </div>
         </div>
         {% endfor %}
     </div>
 
-    <div style="text-align:center; margin-top:30px;">
-        <a href="/" style="color:#1a237e; font-weight:bold; text-decoration:none; border:2px solid #1a237e; padding:10px 20px; border-radius:10px;">
-            <i class="fas fa-home"></i> Ana Menüye Dön
+    <div style="text-align:center; margin-top:40px;">
+        <a href="/" class="btn-home">
+            <i class="fas fa-arrow-left"></i> Ana Menüye Dön
         </a>
     </div>
 </div>
