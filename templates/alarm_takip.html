@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CORE_V3 | Takip Paneli</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #00ffbb;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --danger: #ff4b5c;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .list-container {
+            background-color: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 850px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h2 {
+            color: var(--accent);
+            margin: 0 0 0.5rem 0;
+            text-align: center;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+
+        .user-info {
+            text-align: center;
+            color: var(--text-dim);
+            margin-bottom: 2.5rem;
+            font-size: 0.95rem;
+            background: rgba(0, 255, 187, 0.05);
+            padding: 8px;
+            border-radius: 8px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+            margin-top: 10px;
+        }
+
+        th {
+            text-align: left;
+            color: var(--text-dim);
+            padding: 12px 15px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        tbody tr {
+            background-color: rgba(255,255,255,0.02);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255,255,255,0.05);
+            transform: scale(1.01);
+        }
+
+        td {
+            padding: 16px 15px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        td:first-child { border-left: 1px solid rgba(255,255,255,0.05); border-radius: 8px 0 0 8px; }
+        td:last-child { border-right: 1px solid rgba(255,255,255,0.05); border-radius: 0 8px 8px 0; }
+
+        .symbol-tag {
+            background: rgba(0, 255, 187, 0.1);
+            color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
+        .dot-active { background-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+        .dot-sent { background-color: var(--text-dim); }
+
+        .btn-del {
+            color: var(--danger);
+            text-decoration: none;
+            border: 1px solid rgba(255, 75, 92, 0.3);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-del:hover {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 75, 92, 0.3);
+        }
+
+        .btn-back {
+            display: inline-block;
+            margin-top: 2rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-bottom: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover { border-bottom: 1px solid var(--accent); }
+
+        .footer { text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="list-container">
+    <h2>🚀 Aktif Takip Listesi</h2>
+    <div class="user-info">Hesap: <b>{{ kullanici_email }}</b></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sembol</th>
+                <th>Hedef Fiyat</th>
+                <th>Kuruluş Tarihi</th>
+                <th>Durum</th>
+                <th>Yönet</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for alarm in alarmlar %}
+            <tr>
+                <td><span class="symbol-tag">{{ alarm[0] }}</span></td>
+                <td><b style="color: #fff;">${{ "{:,.2f}".format(alarm[1]) }}</b></td>
+                <td style="color: var(--text-dim); font-size: 0.85rem;">{{ alarm[5] }}</td>
+                <td>
+                    {% if alarm[2] == 'active' %}
+                        <div class="status-badge" style="color: var(--accent);">
+                            <span class="dot dot-active"></span> Bekliyor
+                        </div>
+                    {% else %}
+                        <div class="status-badge" style="color: var(--text-dim);">
+                            <span class="dot dot-sent"></span> Tamamlandı
+                        </div>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/alarm_sil/{{ alarm[4] }}?email={{ kullanici_email }}"
+                       class="btn-del"
+                       onclick="return confirm('Bu alarmı kalıcı olarak silmek istediğine emin misin?')">
+                       SİL
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-dim);">
+                    📭 Henüz bir alarm kurmamışsın.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <a href="/" class="btn-back">← Panel'e Geri Dön</a>
+    </div>
+</div>
+
+</body>
+</html>
