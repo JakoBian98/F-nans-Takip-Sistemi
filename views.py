@@ -31,6 +31,7 @@ import time
 import ccxt
 import ccxt.async_support as ccxt_async
 from requests.exceptions import RequestException
+import yfinance as yf
 from plotly.subplots import make_subplots
 from groq import Groq
 matplotlib.use('Agg')
@@ -53,7 +54,7 @@ def email_gecerli_mi(email):
     return False
 
 
-import yfinance as yf
+
 
 
 def zaman_dilimi_kontrol(interval, period):
@@ -573,7 +574,6 @@ async def fetch_exchange_data(ex_id, symbol, coin):
 
 
 async def get_multi_exchange_arbitrage_async(coin, is_crypto=True):
-    # --- HİSSE / EMTİA KONTROLÜ ---
     if not is_crypto:
         return {
             "is_available": False,
@@ -783,7 +783,7 @@ def hisse_ısı_haritası():
 
 
 @app.route("/Finance",methods=['POST'])
-async def Finance():
+def Finance():
     try:
         sembol = request.form.get('hisse').upper()
         Dil = request.form.get('Dil')
@@ -1419,7 +1419,9 @@ async def Finance():
 
             if kripto_mu:
                 arama_sembolü = f"{temiz_sembol}USDT"
-                arbitraj_sonuc = await get_multi_exchange_arbitrage_async(arama_sembolü, is_crypto=True)
+                arbitraj_sonuc =  arbitraj_sonuc = {
+                    "is_available": False,
+                    "not": "Arbitraj Desteği Gelecek Sürümde Eklenecek"}
             else:
                 arbitraj_sonuc = {
                     "is_available": False,
