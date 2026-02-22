@@ -405,7 +405,6 @@ def kripto_ısı_haritası():
 
         renk_paleti = ["#1e293b"] + df['Renk'].tolist()
 
-        # GRAFİK OLUŞTURMA
         fig = px.treemap(
             df,
             path=[px.Constant("BINANCE TOP 300"), 'Coin'],
@@ -711,7 +710,7 @@ def hisse_ısı_haritası():
         }
         interval = intervals.get(period, "1h")
 
-        df = yf.download(nasdaq_300_hisseleri, period=period, interval=interval, progress=False, threads=50)
+        df = yf.download(nasdaq_300_hisseleri, period=period, interval=interval, progress=False, threads=5)
         hisse_listesi, degisim_listesi, hacim_listesi, renk_listesi, fiyat_listesi = [], [], [], [], []
 
         for hisse in nasdaq_300_hisseleri:
@@ -2203,11 +2202,8 @@ def grafik_penceresi():
                     if len(tsi_res.columns) >= 2:
                         tsi_sig_col = tsi_res.columns[1]
                     else:
-                        # Sinyal yoksa oluştur
                         tsi_sig_col = f"{tsi_col}_Signal"
                         tsi_res[tsi_sig_col] = tsi_res[tsi_col].ewm(span=13, adjust=False).mean()
-
-                    # DataFrame'e ekle
                     df = pd.concat([df, tsi_res], axis=1)
                     tsi_df = tsi_res
         except Exception as e:
@@ -2216,7 +2212,6 @@ def grafik_penceresi():
             tsi_col = None
             tsi_sig_col = None
 
-        # --- ULCER INDEX HESAPLAMA ---
         ui_col = 'UI_14'
         ui_df = None
         try:
@@ -2273,10 +2268,10 @@ def grafik_penceresi():
                 print(f"UO eklenirken hata oluştu: {e}")
                 uo_col = None
         if son_fiyat >= ilk_fiyat:
-            ana_renk = "#00ffbb"  # Turkuaz / Yeşil
+            ana_renk = "#00ffbb"
             dolgu_renk = "rgba(0, 255, 187, 0.2)"
         else:
-            ana_renk = "#ff4b5c"  # Kırmızı / Gül rengi
+            ana_renk = "#ff4b5c"
             dolgu_renk = "rgba(255, 75, 92, 0.2)"
         uo_col = find_col(df.columns, "UO")
         pmo_col = None
@@ -2323,7 +2318,6 @@ def grafik_penceresi():
             print(f"Special K Atlama: Veri yetersiz veya hesaplanamadı.")
             pass
 
-        # Bollinger notu
         if bbu_col and bbm_col and bbl_col:
             if son_fiyat >= bb_upper:
                 bb_notu = "Fiyat Üst Bantta – Aşırı Alım veya güçlü yükseliş trendi."
@@ -2419,7 +2413,6 @@ def grafik_penceresi():
                 font_family="Fira Code",
                 font_color="#f8fafc"
             ),
-            # ------------------------
             xaxis=dict(
                 type="category",
                 showspikes=True,
@@ -2438,6 +2431,7 @@ def grafik_penceresi():
             plot_bgcolor="#020617",
             margin=dict(l=20, r=20, t=60, b=20)
         )
+        fig_line = json.dumps(fig,cls=PlotlyJSONEncoder)
 
         fig_candle_volume = go.Figure()
         for i in range(n):
@@ -2494,6 +2488,8 @@ def grafik_penceresi():
                 plot_bgcolor="#020617",
                 margin=dict(l=20, r=20, t=60, b=20),
                 showlegend=True )
+        fig_candle_volume_json = json.dumps(fig_candle_volume, cls=PlotlyJSONEncoder)
+        del fig_candle_volume
 
         try:
             aroon_res = df.ta.aroon(length=25)
@@ -2526,6 +2522,8 @@ def grafik_penceresi():
             paper_bgcolor="#020617",
             plot_bgcolor="#020617",
         )
+        bar_json = json.dumps(fig_bar,cls=PlotlyJSONEncoder)
+        del fig_bar
 
         try:
             basis = df.ta.sma(length=20)
@@ -2571,6 +2569,8 @@ def grafik_penceresi():
             ),
             yaxis=dict(side="right", gridcolor="rgba(255,255,255,0.05)")
         )
+
+        hollow_json = json.dumps(hollow_candle,cls=PlotlyJSONEncoder)
 
         row_heights = [0.40, 0.1, 0.1, 0.1, 0.1, 0.1, 0.10]
 
@@ -3085,12 +3085,10 @@ def grafik_penceresi():
                         visible='legendonly'
                     ), row=7, col=1
                 )
-                # Sıfır hattı (Referans çizgisi)
                 fig_candle.add_hline(y=0, line_dash="dash", line_color="white", row=7, col=1)
         except:
             pass
 
-        # --- AROON UP & DOWN (Panel 6) ---
         if aroon_up_col and aroon_down_col:
             fig_candle.add_trace(
                 go.Scatter(x=x_ekseni, y=df[aroon_up_col].fillna(0).values.flatten().tolist(),
@@ -3578,7 +3576,6 @@ def grafik_penceresi():
                 font_family="Fira Code",
                 font_color=ana_renk
             ),
-            # -------------------------------
             xaxis=dict(
                 type="category",
                 gridcolor="rgba(255,255,255,0.05)",
@@ -3593,6 +3590,8 @@ def grafik_penceresi():
             plot_bgcolor="#020617",
             margin=dict(l=20, r=20, t=60, b=20)
         )
+
+        alan_json = json.dumps(fig_alan,cls=PlotlyJSONEncoder)
 
         fig_heikin = go.Figure()
         fig_heikin.add_trace(
@@ -3624,6 +3623,9 @@ def grafik_penceresi():
                 spikecolor="#94a3b8"
             )
         )
+
+        heikin_json = json.dumps(fig_heikin,cls=PlotlyJSONEncoder)
+        del fig_heikin
 
         fig_candle.update_layout(
             template="plotly_dark",
@@ -3804,6 +3806,9 @@ def grafik_penceresi():
                 "hata": 'Hata',
                 "durum": "Veri hesaplanamadı"
             }
+
+        candle_json = json.dumps(fig_candle,cls=PlotlyJSONEncoder)
+        del fig_candle
         try:
             teknik_talimat = (
                 f"Sen dünyanın en saygın yatırım bankalarında çalışan kıdemli bir fon yöneticisi ve baş stratejistsin. "
@@ -3848,13 +3853,13 @@ def grafik_penceresi():
             kapanıs=son_fiyat,
             ai_analiz_notu=ai_analiz_notu,
             zirveden_uzaklık=zirveden_uzaklık,
-            line_json=json.dumps(fig, cls=PlotlyJSONEncoder),
-            candle_json=json.dumps(fig_candle, cls=PlotlyJSONEncoder),
-            bar_json=json.dumps(fig_bar, cls=PlotlyJSONEncoder),
-            candle_volume_json=json.dumps(fig_candle_volume, cls=PlotlyJSONEncoder),
-            heikin_ashi_json=json.dumps(fig_heikin, cls=PlotlyJSONEncoder),
-            area_json=json.dumps(fig_alan, cls=PlotlyJSONEncoder),
-            hollow_candle_json=json.dumps(hollow_candle, cls=PlotlyJSONEncoder),
+            line_json=fig_line,
+            candle_json=candle_json,
+            bar_json=bar_json,
+            candle_volume_json=fig_candle_volume_json,
+            heikin_ashi_json=heikin_json,
+            area_json=alan_json,
+            hollow_candle_json=hollow_json,
             hisse=sembol,
             fiyat_son=round(float(son_fiyat), 2),
             fiyat_degisim=round(((son_fiyat / ilk_fiyat) - 1) * 100, 2),
@@ -3900,19 +3905,6 @@ def grafik_penceresi():
                     del locals()[var_name]
                 except:
                     pass
-        silinecek_fig_list = [
-            'fig', 'fig_candle', 'fig_candle_volume', 'fig_bar',
-            'fig_alan', 'fig_heikin', 'hollow_candle'
-        ]
-
-        for var_name in silinecek_fig_list:
-            if var_name in locals() and locals()[var_name] is not None:
-                try:
-                    if hasattr(locals()[var_name], 'close'):
-                        locals()[var_name].close()
-                    del locals()[var_name]
-                except:
-                    pass
         buyuk_listeler = [
             'x_ekseni', 'mum_open', 'mum_high', 'mum_low', 'mum_close',
             'volume_values', 'hacim_etiketleri', 'mum_genislikleri',
@@ -3930,10 +3922,8 @@ def grafik_penceresi():
                 del locals()['ai_ozet_veri']
             except:
                 pass
-        import gc
         gc.collect()
         gc.collect(generation=2)
-        gc.close()
 
 
 @app.route("/Coklu_Grafik_Giris")
@@ -4233,8 +4223,13 @@ def dolar_bazlı_grafik_ekranı():
             )
         )
 
+
+
         grafik_json = json.dumps(fig, cls=PlotlyJSONEncoder)
         grafik_mum_json = json.dumps(fig_candle,cls=PlotlyJSONEncoder)
+
+        del fig
+        del fig_candle
 
 
 
@@ -4287,12 +4282,6 @@ def dolar_bazlı_grafik_ekranı():
             del dolar_bazlı_seri
         if df_bazlı is not None:
             del df_bazlı
-        if fig is not None:
-            fig.close()
-            del fig
-        if fig_candle is not None:
-            fig_candle.close()
-            del fig_candle
 
         if x_ekseni is not None:
             del x_ekseni
@@ -4404,6 +4393,7 @@ def usd_hacim_analiz():
         )
 
         usd_hacim_json = json.dumps(fig,cls=PlotlyJSONEncoder)
+        del fig
         return render_template("usd_hacim_sonuc.html",
                                usd_hacim_grafik_url=usd_hacim_json ,
                                sembol=sembol,
@@ -4461,7 +4451,7 @@ def coinler_en_popüler():
             "BTC-EUR","BTC-GBP",
             "KCS-USD","RENDER-USD","TRUMP35336-USD" , "FBTC-USD" ,"QNT-USD","SLISBNBX-USD"
         ]
-        df = yf.download(semboller,period="1d",interval="1m",progress=False,threads=True,timeout=12)
+        df = yf.download(semboller,period="1d",interval="1m",progress=False,threads=5,timeout=12)
         if df.empty:
             return "Veri Alınamadı"
 
@@ -4955,7 +4945,7 @@ def borsa_paneli():
         }
 
         semboller = [k + ".IS" for k in hisse_rehberi.keys()]
-        df = yf.download(semboller, period="1d", interval="30m", progress=False, threads=50,timeout=13.5)
+        df = yf.download(semboller, period="1d", interval="30m", progress=False, threads=5,timeout=20)
         if df.empty:
             return "Veri Alınamadı"
 
